@@ -44,7 +44,10 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left side image */}
-      <div className="hidden md:flex flex-1 bg-cover bg-center" style={{ backgroundImage: 'url(/images/investment.jpg)' }}></div>
+      <div
+        className="hidden md:flex flex-1 bg-cover bg-center"
+        style={{ backgroundImage: 'url(/images/investment.jpg)' }}
+      ></div>
 
       {/* Right side form */}
       <div className="flex flex-col justify-center flex-1 px-8 md:px-16">
@@ -52,7 +55,11 @@ const Login: React.FC = () => {
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4 max-w-md w-full">
           {error && <p className="text-red-600">{error}</p>}
-          {resetSent && <p className="text-green-600">Email para resetar a senha enviado!</p>}
+          {resetSent && (
+            <p className="text-green-600">
+              Email para resetar a senha enviado! Verifique sua caixa de entrada.
+            </p>
+          )}
 
           <input
             type="email"

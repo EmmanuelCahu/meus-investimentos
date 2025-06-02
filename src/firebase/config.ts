@@ -1,16 +1,18 @@
-import { initializeApp } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
+// src/firebase/config.ts
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: 'SUA_API_KEY',
-  authDomain: 'SEU_DOMINIO.firebaseapp.com',
-  projectId: 'SEU_PROJECT_ID',
-  storageBucket: 'SEU_BUCKET.appspot.com',
-  messagingSenderId: 'SEU_SENDER_ID',
-  appId: 'SEU_APP_ID'
-}
+  apiKey: "AIzaSyBS2q52cu5YHiD8o77FL9hKhUso96HZMXw",
+  authDomain: "investcahu.firebaseapp.com",
+  projectId: "investcahu",
+  storageBucket: "investcahu.firebasestorage.app",
+  messagingSenderId: "346068595798",
+  appId: "1:346068595798:web:cf1bb568944b1a522b77f7",
+  measurementId: "G-HCEQ2YCW55",
+};
 
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
-
-export { db }
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);

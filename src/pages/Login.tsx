@@ -1,102 +1,55 @@
-// src/pages/Login.tsx
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/config";
-import { Link, useNavigate } from "react-router-dom";
-import LoadingSpinner from "../components/LoadingSpinner";
+import { useNavigate, Link } from "react-router-dom";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
-
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      await signInWithEmailAndPassword(auth, email, senha);
+      navigate("/ativos");
     } catch (err: any) {
-      setError(err.message || "Erro ao fazer login");
-    }
-    setLoading(false);
-  };
-
-  const handleResetPassword = async () => {
-    if (!email) {
-      setError("Por favor, informe seu email para resetar a senha");
-      return;
-    }
-    setError(null);
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setResetSent(true);
-    } catch (err: any) {
-      setError(err.message || "Erro ao enviar email de reset");
+      setErro(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left side image */}
-      <div
-        className="hidden md:flex flex-1 bg-cover bg-center"
-        style={{ backgroundImage: 'url(/images/investment.jpg)' }}
-      ></div>
-
-      {/* Right side form */}
-      <div className="flex flex-col justify-center flex-1 px-8 md:px-16">
-        <h1 className="text-3xl font-bold mb-8">Meus Investimentos</h1>
-
-        <form onSubmit={handleLogin} className="flex flex-col gap-4 max-w-md w-full">
-          {error && <p className="text-red-600">{error}</p>}
-          {resetSent && (
-            <p className="text-green-600">
-              Email para resetar a senha enviado! Verifique sua caixa de entrada.
-            </p>
-          )}
-
+    <div className="flex h-screen">
+      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-400 to-purple-600 items-center justify-center">
+        <h1 className="text-white text-4xl font-bold">Meus Investimentos</h1>
+      </div>
+      <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-8">
+        <form onSubmit={handleLogin} className="w-full max-w-md space-y-4">
+          <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
           <input
             type="email"
-            placeholder="E-mail"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full border rounded px-4 py-2"
             required
-            className="p-3 border rounded"
           />
           <input
             type="password"
             placeholder="Senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            className="w-full border rounded px-4 py-2"
             required
-            className="p-3 border rounded"
           />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-green-600 text-white p-3 rounded disabled:opacity-50"
-          >
-            {loading ? <LoadingSpinner /> : "Login"}
+          {erro && <p className="text-red-500 text-sm">{erro}</p>}
+          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
+            Entrar
           </button>
-
-          <div className="flex justify-between items-center text-sm">
-            <button
-              type="button"
-              onClick={handleResetPassword}
-              className="text-blue-500 hover:underline"
-            >
-              Esqueci minha senha
-            </button>
-            <Link to="/signup" className="text-blue-500 hover:underline">
-              Não tem conta? Cadastre-se
-            </Link>
+          <div className="flex justify-between text-sm mt-2">
+            <Link to="/forgot-password" className="text-blue-600">Esqueci a senha</Link>
+            <Link to="/signup" className="text-blue-600">Criar conta</Link>
           </div>
         </form>
       </div>

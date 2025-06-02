@@ -10,17 +10,22 @@ import Educacao from "./pages/Educacao";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword"; // Nova página
+import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
 import Navbar from "./components/Navbar";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "./firebase/config";
+import { useAuthStatus } from "./hooks/useAuthStatus";
 
 const App: React.FC = () => {
-  const [user, loading] = useAuthState(auth);
+  const { user, loading } = useAuthStatus();
 
-  if (loading) return <p>Carregando...</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-lg font-medium">Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
@@ -33,7 +38,6 @@ const App: React.FC = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            {/* Redirecionar qualquer rota privada para login */}
             <Route path="*" element={<Login />} />
           </>
         ) : (

@@ -8,11 +8,12 @@ import Recomendacoes from "./pages/Recomendacoes";
 import Mercado from "./pages/Mercado";
 import Educacao from "./pages/Educacao";
 
-import Login from "./pages/Login"; // Supondo que já tenha
-import Signup from "./pages/Signup"; // Já existe
-import ResetPassword from "./pages/ResetPassword"; // Página que vou criar
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword"; // Nova página
+import ResetPassword from "./pages/ResetPassword";
 
-import Navbar from "./components/Navbar"; // Navbar com Dashboard etc
+import Navbar from "./components/Navbar";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "./firebase/config";
 
@@ -30,6 +31,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* Redirecionar qualquer rota privada para login */}
             <Route path="*" element={<Login />} />

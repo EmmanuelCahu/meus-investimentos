@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore'
-import { db } from '../services/firebase'
+import { db } from '../firebase/config'
 
 interface Ativo {
   id: string

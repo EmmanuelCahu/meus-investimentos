@@ -1,8 +1,18 @@
-export default function Home() {
+import React from "react";
+import { Link } from "react-router-dom";
+
+const Home: React.FC = () => {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Bem-vindo ao Meus Investimentos</h1>
-      <p className="mt-2">Gerencie e analise seus ativos com facilidade.</p>
+    <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">Bem-vindo ao Meus Investimentos</h1>
+        <p className="text-gray-600 mb-6">Gerencie seus ativos com inteligência e segurança.</p>
+        <Link to="/login" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+          Fazer Login
+        </Link>
+      </div>
     </div>
-  )
-}
+  );
+};
+
+export default Home;

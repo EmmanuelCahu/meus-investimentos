@@ -1,27 +1,25 @@
 import React, { useState, useEffect } from 'react'
-import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore'
-import { db } from '../firebase/config'
+import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore'
+import { db } from '../services/firebase'
 
-type Ativo = {
+interface Ativo {
   id: string
   nome: string
   tipo: string
-  quantidade: number
-  valorUnitario: number
+  valor: number
 }
 
-const Ativos = () => {
+const Ativos: React.FC = () => {
   const [ativos, setAtivos] = useState<Ativo[]>([])
   const [nome, setNome] = useState('')
-  const [tipo, setTipo] = useState('Ação')
-  const [quantidade, setQuantidade] = useState(0)
-  const [valorUnitario, setValorUnitario] = useState(0)
+  const [tipo, setTipo] = useState('')
+  const [valor, setValor] = useState<number | ''>('')
 
   const ativosCollection = collection(db, 'ativos')
 
   const fetchAtivos = async () => {
     const data = await getDocs(ativosCollection)
-    setAtivos(data.docs.map(doc => ({ id: doc.id, ...(doc.data() as Omit<Ativo, 'id'>) })))
+    setAtivos(data.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Ativo[])
   }
 
   useEffect(() => {
@@ -29,107 +27,67 @@ const Ativos = () => {
   }, [])
 
   const handleAddAtivo = async () => {
-    if (!nome || quantidade <= 0 || valorUnitario <= 0) return
-
-    await addDoc(ativosCollection, {
-      nome,
-      tipo,
-      quantidade,
-      valorUnitario,
-    })
-
+    if (!nome || !tipo || valor === '') return
+    await addDoc(ativosCollection, { nome, tipo, valor: Number(valor) })
     setNome('')
-    setQuantidade(0)
-    setValorUnitario(0)
-    setTipo('Ação')
+    setTipo('')
+    setValor('')
     fetchAtivos()
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteAtivo = async (id: string) => {
     await deleteDoc(doc(db, 'ativos', id))
     fetchAtivos()
   }
 
   return (
-    <section>
-      <h2 className="text-2xl font-bold mb-4">Meus Ativos</h2>
+    <div className="container mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-4">Ativos</h2>
+
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Nome do ativo"
+          placeholder="Nome"
           value={nome}
           onChange={e => setNome(e.target.value)}
-          className="border rounded px-3 py-2 mr-2"
+          className="border p-2 mr-2"
         />
-        <select
+        <input
+          type="text"
+          placeholder="Tipo"
           value={tipo}
           onChange={e => setTipo(e.target.value)}
-          className="border rounded px-3 py-2 mr-2"
-        >
-          <option>Ação</option>
-          <option>FII</option>
-          <option>Criptomoeda</option>
-          <option>Renda Fixa</option>
-        </select>
-        <input
-          type="number"
-          placeholder="Quantidade"
-          value={quantidade}
-          onChange={e => setQuantidade(Number(e.target.value))}
-          className="border rounded px-3 py-2 mr-2 w-24"
+          className="border p-2 mr-2"
         />
         <input
           type="number"
-          placeholder="Valor unitário"
-          value={valorUnitario}
-          onChange={e => setValorUnitario(Number(e.target.value))}
-          className="border rounded px-3 py-2 mr-2 w-32"
+          placeholder="Valor"
+          value={valor}
+          onChange={e => setValor(e.target.value === '' ? '' : Number(e.target.value))}
+          className="border p-2 mr-2"
         />
         <button
           onClick={handleAddAtivo}
-          className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Adicionar
         </button>
       </div>
 
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr>
-            <th className="border border-gray-300 px-4 py-2">Nome</th>
-            <th className="border border-gray-300 px-4 py-2">Tipo</th>
-            <th className="border border-gray-300 px-4 py-2">Quantidade</th>
-            <th className="border border-gray-300 px-4 py-2">Valor Unitário (R$)</th>
-            <th className="border border-gray-300 px-4 py-2">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ativos.map(ativo => (
-            <tr key={ativo.id}>
-              <td className="border border-gray-300 px-4 py-2">{ativo.nome}</td>
-              <td className="border border-gray-300 px-4 py-2">{ativo.tipo}</td>
-              <td className="border border-gray-300 px-4 py-2">{ativo.quantidade}</td>
-              <td className="border border-gray-300 px-4 py-2">{ativo.valorUnitario.toFixed(2)}</td>
-              <td className="border border-gray-300 px-4 py-2">
-                <button
-                  onClick={() => handleDelete(ativo.id)}
-                  className="text-red-600 hover:underline"
-                >
-                  Excluir
-                </button>
-              </td>
-            </tr>
-          ))}
-          {ativos.length === 0 && (
-            <tr>
-              <td colSpan={5} className="text-center py-4 text-gray-500">
-                Nenhum ativo cadastrado.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </section>
+      <ul>
+        {ativos.map(ativo => (
+          <li key={ativo.id} className="flex justify-between border-b py-2">
+            <span>{ativo.nome} - {ativo.tipo} - R$ {ativo.valor.toFixed(2)}</span>
+            <button
+              onClick={() => handleDeleteAtivo(ativo.id)}
+              className="text-red-500 hover:text-red-700"
+            >
+              Excluir
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

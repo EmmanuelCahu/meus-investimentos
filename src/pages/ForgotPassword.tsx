@@ -4,7 +4,7 @@ import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { Link } from "react-router-dom";
 
-import Button from "../components/ui/Buttons";
+import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 
 const ForgotPassword: React.FC = () => {

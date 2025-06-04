@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 
+import Button from "../components/ui/Buttons";
+import Input from "../components/ui/Input";
+
 const ResetPassword: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -55,29 +58,23 @@ const ResetPassword: React.FC = () => {
       {success && <p className="text-green-600 mb-2">{success}</p>}
       {error && <p className="text-red-600 mb-2">{error}</p>}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input
+        <Input
           type="password"
           placeholder="Nova senha"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           required
-          className="p-2 border rounded"
         />
-        <input
+        <Input
           type="password"
           placeholder="Confirmar nova senha"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
-          className="p-2 border rounded"
         />
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-green-600 text-white p-2 rounded disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading}>
           {loading ? "Redefinindo..." : "Redefinir senha"}
-        </button>
+        </Button>
       </form>
       <div className="mt-4 text-sm">
         <Link to="/login" className="text-blue-500 hover:underline">

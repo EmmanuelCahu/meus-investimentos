@@ -1,5 +1,3 @@
-// src/pages/Ativos.tsx
-
 import React, { useState, useEffect, useCallback } from 'react'
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '../firebase/config'
@@ -7,18 +5,61 @@ import { Ativo } from '../components/types'
 import AtivoForm from '../components/AtivoForm'
 import Filters from '../components/Filters'
 import PaginatedTable from '../components/PaginatedTable'
-import ConfirmModal from '../components/ConfirmModal'  // <-- aqui
+import ConfirmModal from '../components/ConfirmModal'
 import Toast from '../components/Toast'
 
 const ITEMS_PER_PAGE = 5
 
 const Ativos: React.FC = () => {
-  // ... estados e lógica omitidos para brevidade ...
+  const [ativos, setAtivos] = useState<Ativo[]>([])
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  // Confirma exclusão de um ativo
+  // Filtragem e paginação
+  const [filterNome, setFilterNome] = useState('')
+  const [filterTipo, setFilterTipo] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const fetchAtivos = useCallback(async () => {
+    setLoading(true)
+    setErrorMessage(null)
+    try {
+      const snapshot = await getDocs(collection(db, 'ativos'))
+      const data: Ativo[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...(doc.data() as Omit<Ativo, 'id'>),
+      }))
+      setAtivos(data)
+    } catch (error) {
+      setErrorMessage('Erro ao buscar ativos.')
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchAtivos()
+  }, [fetchAtivos])
+
+  const handleAddAtivo = async (novoAtivo: Omit<Ativo, 'id'>) => {
+    try {
+      setLoading(true)
+      const docRef = await addDoc(collection(db, 'ativos'), novoAtivo)
+      setToastMessage('Ativo adicionado com sucesso!')
+      fetchAtivos()
+    } catch (error) {
+      setErrorMessage('Erro ao adicionar ativo.')
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const confirmDeleteAtivo = async () => {
     if (!deleteId) return
-
     try {
       setLoading(true)
       setErrorMessage(null)
@@ -28,17 +69,59 @@ const Ativos: React.FC = () => {
       fetchAtivos()
     } catch (error) {
       setErrorMessage('Erro ao excluir ativo. Tente novamente.')
-      console.error('confirmDeleteAtivo error:', error)
+      console.error(error)
     } finally {
       setLoading(false)
     }
   }
 
-  return (
-    <div className="max-w-4xl mx-auto p-4">
-      {/* ... restante do JSX ... */}
+  // Filtrar ativos de acordo com nome e tipo
+  const filteredAtivos = ativos.filter(ativo => {
+    const matchNome = ativo.nome.toLowerCase().includes(filterNome.toLowerCase())
+    const matchTipo = filterTipo ? ativo.tipo === filterTipo : true
+    return matchNome && matchTipo
+  })
 
-      {/* Chamando o ConfirmModal que você já tem */}
+  // Paginação
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const paginatedAtivos = filteredAtivos.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filteredAtivos.length / ITEMS_PER_PAGE)
+
+  return (
+    <div className="max-w-4xl mx-auto p-4 animate-fade-in">
+      <h1 className="text-3xl font-bold mb-6">Ativos</h1>
+
+      {errorMessage && (
+        <div className="mb-4 p-3 bg-red-200 text-red-800 rounded">
+          {errorMessage}
+        </div>
+      )}
+
+      <AtivoForm onAddAtivo={handleAddAtivo} loading={loading} />
+
+      <Filters
+        filterNome={filterNome}
+        setFilterNome={setFilterNome}
+        filterTipo={filterTipo}
+        setFilterTipo={setFilterTipo}
+      />
+
+      {loading && <p className="my-4">Carregando ativos...</p>}
+
+      {!loading && paginatedAtivos.length === 0 && (
+        <p className="my-4 text-gray-600">Nenhum ativo cadastrado.</p>
+      )}
+
+      {!loading && paginatedAtivos.length > 0 && (
+        <PaginatedTable
+          data={paginatedAtivos}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          onDelete={(id) => setDeleteId(id)}
+        />
+      )}
+
       <ConfirmModal
         isOpen={!!deleteId}
         title="Confirmação de exclusão"
@@ -47,7 +130,12 @@ const Ativos: React.FC = () => {
         onCancel={() => setDeleteId(null)}
       />
 
-      {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
     </div>
   )
 }

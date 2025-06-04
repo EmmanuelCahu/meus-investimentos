@@ -1,43 +1,51 @@
-import React from "react";
-import { cn } from "@/lib/utils";
+// src/components/ui/Input.tsx
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
+import React from 'react';
+
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  id: string;
+  label: string;
   error?: string;
+  icon?: React.ReactNode;
 }
 
-const baseStyles =
-  "block w-full rounded-xl border px-4 py-2 text-sm focus:outline-none transition-colors";
-
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className, id, ...props }, ref) => {
-    const inputId = id || props.name || `input-${Math.random().toString(36).substr(2, 9)}`;
-    return (
-      <div className="w-full">
-        {label && (
-          <label htmlFor={inputId} className="mb-1 block text-sm font-medium text-gray-700">
-            {label}
-          </label>
-        )}
-        <input
-          id={inputId}
-          ref={ref}
-          className={cn(
-            baseStyles,
-            error
-              ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:border-blue-500 focus:ring-blue-500",
-            className
-          )}
-          aria-invalid={!!error}
-          {...props}
-        />
-        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-      </div>
-    );
-  }
+const Input: React.FC<InputProps> = ({
+  id,
+  label,
+  error,
+  icon,
+  className,
+  ...rest
+}) => (
+  <div className="flex flex-col">
+    <label
+      htmlFor={id}
+      className="mb-1 font-medium text-gray-700 dark:text-gray-300"
+    >
+      {label}
+    </label>
+    <div className="relative">
+      {icon && (
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          {icon}
+        </div>
+      )}
+      <input
+        id={id}
+        {...rest}
+        className={`w-full border rounded-lg py-2 px-3 text-gray-800 dark:text-gray-200 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          icon ? 'pl-10' : ''
+        } ${error ? 'border-red-500' : 'border-gray-300'} ${
+          className || ''
+        }`}
+      />
+    </div>
+    {error && (
+      <p id={`${id}-error`} className="mt-1 text-red-600 text-sm">
+        {error}
+      </p>
+    )}
+  </div>
 );
-
-Input.displayName = "Input";
 
 export default Input;

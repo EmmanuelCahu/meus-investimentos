@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { tiposAtivo } from './types';
+import { tiposAtivo } from '@/types';
 import { Calendar, DollarSign } from 'lucide-react';
-import Input from './ui/Input';
-import Select from './ui/Select';
-import Button from './ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import Button from '@/components/ui/Button';
 
 interface AtivoFormProps {
   nome: string;
@@ -39,10 +39,11 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
     dataCompra: false,
   });
 
+  // Validações
   const nomeError = touched.nome && nome.trim() === '';
   const tipoError = touched.tipo && tipo.trim() === '';
   const valorError = touched.valor && (valor === '' || (typeof valor === 'number' && valor <= 0));
-  const dataError = touched.dataCompra && !dataCompra;
+  const dataError = touched.dataCompra && !(dataCompra instanceof Date) || isNaN(dataCompra.getTime());
 
   const isFormValid = !nomeError && !tipoError && !valorError && !dataError;
 
@@ -67,10 +68,11 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
           label="Nome do Ativo"
           placeholder="Ex: PETR4"
           value={nome}
-          onChange={e => setNome(e.target.value)}
+          onChange={e => setNome(e.target.value.toUpperCase())} // força uppercase (padrão ativo)
           onBlur={() => setTouched(prev => ({ ...prev, nome: true }))}
           error={nomeError ? 'Nome é obrigatório.' : undefined}
           autoComplete="off"
+          disabled={loading}
         />
 
         <Select
@@ -83,6 +85,7 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
           options={[{ value: '', label: 'Selecione o tipo', disabled: true }].concat(
             tiposAtivo.map(opcao => ({ value: opcao, label: opcao }))
           )}
+          disabled={loading}
         />
 
         <Input
@@ -97,6 +100,7 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
           min={0}
           step={0.01}
           icon={<DollarSign className="text-gray-500 dark:text-gray-400" size={16} />}
+          disabled={loading}
         />
 
         <Input
@@ -108,13 +112,18 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
           onBlur={() => setTouched(prev => ({ ...prev, dataCompra: true }))}
           error={dataError ? 'Data de compra é obrigatória.' : undefined}
           icon={<Calendar className="text-gray-500 dark:text-gray-400" size={16} />}
+          disabled={loading}
         />
 
         <Button type="submit" disabled={!isFormValid || loading} loading={loading}>
           {loading ? 'Adicionando...' : 'Adicionar Ativo'}
         </Button>
 
-        {errorMessage && <p className="text-red-600 text-sm mt-2">{errorMessage}</p>}
+        {errorMessage && (
+          <p className="text-red-600 text-sm mt-2" role="alert" aria-live="assertive">
+            {errorMessage}
+          </p>
+        )}
       </form>
     </div>
   );

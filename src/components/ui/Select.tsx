@@ -1,66 +1,58 @@
-import React from "react";
-import { cn } from "@/lib/utils";
+// src/components/ui/Select.tsx
 
-export interface SelectOption {
+import React from 'react';
+
+interface Option {
   value: string;
   label: string;
+  disabled?: boolean;
 }
 
-export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  label?: string;
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  id: string;
+  label: string;
+  options: Option[];
   error?: string;
-  options: SelectOption[];
 }
 
-const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, options, className, id, ...props }, ref) => {
-    const selectId = id || props.name || `select-${Math.random().toString(36).slice(2, 11)}`;
-
-    return (
-      <div className="w-full">
-        {label && (
-          <label
-            htmlFor={selectId}
-            className="block mb-1 text-sm font-medium text-gray-700"
-          >
-            {label}
-          </label>
-        )}
-        <select
-          id={selectId}
-          ref={ref}
-          className={cn(
-            "w-full rounded-xl border px-4 py-2 text-sm transition-colors focus:outline-none focus:ring-2",
-            error
-              ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:border-blue-500 focus:ring-blue-500",
-            className
-          )}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${selectId}-error` : undefined}
-          {...props}
+const Select: React.FC<SelectProps> = ({
+  id,
+  label,
+  options,
+  error,
+  className,
+  ...rest
+}) => (
+  <div className="flex flex-col">
+    <label
+      htmlFor={id}
+      className="mb-1 font-medium text-gray-700 dark:text-gray-300"
+    >
+      {label}
+    </label>
+    <select
+      id={id}
+      {...rest}
+      className={`w-full border rounded-lg py-2 px-3 text-gray-800 dark:text-gray-200 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+        error ? 'border-red-500' : 'border-gray-300'
+      } ${className || ''}`}
+    >
+      {options.map((opcao) => (
+        <option
+          key={opcao.value}
+          value={opcao.value}
+          disabled={opcao.disabled}
         >
-          <option value="">Selecione uma opção</option>
-          {options.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-        {error && (
-          <p
-            id={`${selectId}-error`}
-            role="alert"
-            className="mt-1 text-xs text-red-600"
-          >
-            {error}
-          </p>
-        )}
-      </div>
-    );
-  }
+          {opcao.label}
+        </option>
+      ))}
+    </select>
+    {error && (
+      <p id={`${id}-error`} className="mt-1 text-red-600 text-sm">
+        {error}
+      </p>
+    )}
+  </div>
 );
-
-Select.displayName = "Select";
 
 export default Select;

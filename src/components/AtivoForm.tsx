@@ -1,69 +1,123 @@
 // src/components/AtivoForm.tsx
-import React from 'react'
-import { useForm } from 'react-hook-form'
-import { useAtivos } from '../context/AtivosContext'
 
-interface FormData {
+import React from 'react'
+import { tiposAtivo } from './types'
+
+interface AtivoFormProps {
   nome: string
+  setNome: React.Dispatch<React.SetStateAction<string>>
   tipo: string
-  valor: number
+  setTipo: React.Dispatch<React.SetStateAction<string>>
+  valor: number | ''
+  setValor: React.Dispatch<React.SetStateAction<number | ''>>
+  onSubmit: () => void
+  loading: boolean
+  errorMessage: string | null
 }
 
-const AtivoForm: React.FC = () => {
-  const { addAtivo, loading } = useAtivos()
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<FormData>()
-
-  const onSubmit = async (data: FormData) => {
-    await addAtivo(data)
-    reset()
-  }
+const AtivoForm: React.FC<AtivoFormProps> = ({
+  nome,
+  setNome,
+  tipo,
+  setTipo,
+  valor,
+  setValor,
+  onSubmit,
+  loading,
+  errorMessage,
+}) => {
+  const isFormValid =
+    nome.trim() !== '' &&
+    tipo.trim() !== '' &&
+    valor !== '' &&
+    (typeof valor === 'number' ? valor > 0 : false)
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mb-6">
-      <input
-        type="text"
-        placeholder="Nome"
-        {...register('nome', { required: 'Nome é obrigatório' })}
-        className={`border p-2 mr-2 ${errors.nome ? 'border-red-500' : ''}`}
-        aria-invalid={errors.nome ? 'true' : 'false'}
-      />
-      {errors.nome && <span className="text-red-500 mr-2">{errors.nome.message}</span>}
+    <form
+      onSubmit={e => {
+        e.preventDefault()
+        if (isFormValid && !loading) onSubmit()
+      }}
+      aria-label="Formulário para adicionar ativo"
+      className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-4"
+    >
+      <div className="flex-1 flex flex-col">
+        <input
+          type="text"
+          placeholder="Nome"
+          value={nome}
+          onChange={e => setNome(e.target.value)}
+          className="border p-2 w-full"
+          aria-required="true"
+          aria-invalid={nome.trim() === ''}
+          aria-describedby="nome-error"
+        />
+        {nome.trim() === '' && (
+          <span id="nome-error" className="text-red-600 text-sm">
+            Nome é obrigatório.
+          </span>
+        )}
+      </div>
 
-      <input
-        type="text"
-        placeholder="Tipo"
-        {...register('tipo', { required: 'Tipo é obrigatório' })}
-        className={`border p-2 mr-2 ${errors.tipo ? 'border-red-500' : ''}`}
-        aria-invalid={errors.tipo ? 'true' : 'false'}
-      />
-      {errors.tipo && <span className="text-red-500 mr-2">{errors.tipo.message}</span>}
+      <div className="flex-1 flex flex-col">
+        <select
+          value={tipo}
+          onChange={e => setTipo(e.target.value)}
+          className="border p-2 w-full"
+          aria-required="true"
+          aria-invalid={tipo.trim() === ''}
+          aria-describedby="tipo-error"
+        >
+          <option value="" disabled>
+            Selecione o tipo
+          </option>
+          {tiposAtivo.map(tipoItem => (
+            <option key={tipoItem} value={tipoItem}>
+              {tipoItem}
+            </option>
+          ))}
+        </select>
+        {tipo.trim() === '' && (
+          <span id="tipo-error" className="text-red-600 text-sm">
+            Tipo é obrigatório.
+          </span>
+        )}
+      </div>
 
-      <input
-        type="number"
-        step="0.01"
-        placeholder="Valor"
-        {...register('valor', {
-          required: 'Valor é obrigatório',
-          valueAsNumber: true,
-          validate: value => value > 0 || 'Valor deve ser maior que zero',
-        })}
-        className={`border p-2 mr-2 ${errors.valor ? 'border-red-500' : ''}`}
-        aria-invalid={errors.valor ? 'true' : 'false'}
-      />
-      {errors.valor && <span className="text-red-500 mr-2">{errors.valor.message}</span>}
+      <div className="flex-1 flex flex-col">
+        <input
+          type="number"
+          placeholder="Valor"
+          value={valor}
+          onChange={e => {
+            const val = e.target.value
+            setValor(val === '' ? '' : Number(val))
+          }}
+          className="border p-2 w-full"
+          min={0}
+          aria-required="true"
+          aria-invalid={valor === '' || (typeof valor === 'number' && valor <= 0)}
+          aria-describedby="valor-error"
+        />
+        {(valor === '' || (typeof valor === 'number' && valor <= 0)) && (
+          <span id="valor-error" className="text-red-600 text-sm">
+            Valor deve ser maior que zero.
+          </span>
+        )}
+      </div>
 
       <button
         type="submit"
-        disabled={loading}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+        disabled={!isFormValid || loading}
+        className={`px-4 py-2 rounded text-white ${
+          !isFormValid || loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+        } focus:outline-none focus:ring-2 focus:ring-blue-400`}
+        aria-disabled={!isFormValid || loading}
       >
-        {loading ? 'Salvando...' : 'Adicionar'}
+        {loading ? 'Adicionando...' : 'Adicionar'}
       </button>
+
+      {errorMessage && <p className="text-red-600 mt-2">{errorMessage}</p>}
     </form>
   )
 }

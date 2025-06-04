@@ -1,5 +1,3 @@
-// src/components/PaginatedTable.tsx
-
 import React from 'react'
 import { Ativo } from './types'
 
@@ -25,51 +23,36 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
   const totalPages = Math.ceil(ativos.length / itemsPerPage)
   const pagedAtivos = ativos.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
+    currentPage * itemsPerPage
   )
 
-  if (loadingAtivos) {
-    return <p>Carregando ativos...</p>
-  }
-
-  if (ativos.length === 0) {
-    return <p className="text-gray-500">Nenhum ativo encontrado.</p>
-  }
+  if (loadingAtivos) return <p>Carregando ativos...</p>
+  if (ativos.length === 0) return <p className="text-gray-500">Nenhum ativo encontrado.</p>
 
   return (
-    <>
-      <table
-        className="w-full border-collapse"
-        aria-label="Tabela de ativos"
-        role="table"
-      >
-        <thead>
-          <tr className="bg-gray-100">
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse" role="table" aria-label="Tabela de ativos">
+        <thead className="bg-gray-100 dark:bg-gray-700">
+          <tr>
             <th className="border p-2 text-left">Nome</th>
             <th className="border p-2 text-left">Tipo</th>
             <th className="border p-2 text-right">Valor</th>
-            <th className="border p-2">Ações</th>
+            <th className="border p-2 text-center">Ações</th>
           </tr>
         </thead>
         <tbody>
           {pagedAtivos.map(ativo => (
-            <tr key={ativo.id} role="row" className="hover:bg-gray-50">
-              <td className="border p-2" role="cell">
-                {ativo.nome}
-              </td>
-              <td className="border p-2" role="cell">
-                {ativo.tipo}
-              </td>
-              <td className="border p-2 text-right" role="cell">
-                R${ativo.valor.toFixed(2)}
-              </td>
-              <td className="border p-2 text-center" role="cell">
+            <tr key={ativo.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+              <td className="border p-2">{ativo.nome}</td>
+              <td className="border p-2">{ativo.tipo}</td>
+              <td className="border p-2 text-right">R$ {ativo.valor.toFixed(2)}</td>
+              <td className="border p-2 text-center">
                 <button
                   onClick={() => setDeleteId(ativo.id)}
-                  aria-label={`Excluir ativo ${ativo.nome}`}
-                  className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400"
+                  className="text-red-600 hover:underline"
+                  aria-label={`Remover ativo ${ativo.nome}`}
                 >
-                  Excluir
+                  Remover
                 </button>
               </td>
             </tr>
@@ -77,61 +60,23 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
         </tbody>
       </table>
 
+      {/* Paginação */}
       {totalPages > 1 && (
-        <nav
-          className="mt-4 flex justify-center space-x-2"
-          role="navigation"
-          aria-label="Paginação de ativos"
-        >
-          <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className={`px-3 py-1 rounded border ${
-              currentPage === 1
-                ? 'cursor-not-allowed text-gray-400 border-gray-300'
-                : 'hover:bg-gray-200'
-            } focus:outline-none focus:ring-2 focus:ring-gray-500`}
-            aria-disabled={currentPage === 1}
-            aria-label="Página anterior"
-          >
-            &lt;
-          </button>
-
-          {[...Array(totalPages)].map((_, idx) => {
-            const page = idx + 1
-            return (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1 rounded border ${
-                  currentPage === page
-                    ? 'bg-blue-500 text-white border-blue-500'
-                    : 'hover:bg-gray-200'
-                } focus:outline-none focus:ring-2 focus:ring-blue-400`}
-                aria-current={currentPage === page ? 'page' : undefined}
-                aria-label={`Página ${page}`}
-              >
-                {page}
-              </button>
-            )
-          })}
-
-          <button
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded border ${
-              currentPage === totalPages
-                ? 'cursor-not-allowed text-gray-400 border-gray-300'
-                : 'hover:bg-gray-200'
-            } focus:outline-none focus:ring-2 focus:ring-gray-500`}
-            aria-disabled={currentPage === totalPages}
-            aria-label="Próxima página"
-          >
-            &gt;
-          </button>
-        </nav>
+        <div className="flex justify-center mt-4 gap-2">
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-3 py-1 rounded ${
+                currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white'
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
       )}
-    </>
+    </div>
   )
 }
 

@@ -1,6 +1,6 @@
 // src/types/index.ts
 
-// Lista oficial e autorizada dos tipos de ativos permitidos no sistema
+// Lista oficial dos tipos de ativos permitidos no sistema
 export const tiposAtivo = [
   'Ação',
   'FII',
@@ -14,7 +14,7 @@ export const tiposAtivo = [
 // Tipo literal que representa os valores válidos do array acima
 export type TipoAtivo = (typeof tiposAtivo)[number];
 
-// Interface que pode ser usada para o ativo no sistema
+// Interface para representar um ativo
 export interface Ativo {
   nome: string;
   tipo: TipoAtivo;

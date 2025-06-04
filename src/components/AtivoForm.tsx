@@ -1,8 +1,4 @@
-// src/components/AtivoForm.tsx
-
 import React, { useState } from 'react'
-import { DatePicker } from 'react-datepicker' // assume react-datepicker já instalado
-import 'react-datepicker/dist/react-datepicker.css'
 import { tiposAtivo } from './types'
 import { Calendar, DollarSign } from 'lucide-react'
 
@@ -47,12 +43,16 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
 
   const isFormValid = !nomeError && !tipoError && !valorError && !dataError
 
+  const inputBaseStyle = `border rounded p-2 w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 
+    focus:outline-none focus:ring-2 focus:ring-blue-400`
+
   return (
     <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mb-8">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-        <DollarSign className="inline-block mr-2 text-blue-500" size={20} />
+      <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 flex items-center">
+        <DollarSign className="mr-2 text-blue-500" size={20} />
         Novo Ativo
       </h2>
+
       <form
         onSubmit={e => {
           e.preventDefault()
@@ -60,11 +60,10 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
           if (isFormValid && !loading) onSubmit()
         }}
         className="flex flex-col gap-4"
-        aria-label="Formulário para adicionar ativo"
       >
         {/* Nome */}
-        <div className="flex flex-col">
-          <label htmlFor="nome" className="mb-1 text-gray-700 dark:text-gray-300">
+        <div>
+          <label htmlFor="nome" className="mb-1 text-gray-700 dark:text-gray-300 block">
             Nome do Ativo
           </label>
           <input
@@ -74,24 +73,16 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
             value={nome}
             onChange={e => setNome(e.target.value)}
             onBlur={() => setTouched(prev => ({ ...prev, nome: true }))}
-            className={`border rounded p-2 w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 
-              focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                nomeError ? 'border-red-500' : 'border-gray-300'
-              }`}
-            aria-required="true"
+            className={`${inputBaseStyle} ${nomeError ? 'border-red-500' : 'border-gray-300'}`}
             aria-invalid={nomeError}
-            aria-describedby="nome-error"
+            aria-describedby={nomeError ? 'nome-error' : undefined}
           />
-          {nomeError && (
-            <span id="nome-error" className="text-red-600 text-sm mt-1">
-              Nome é obrigatório.
-            </span>
-          )}
+          {nomeError && <p id="nome-error" className="text-red-600 text-sm mt-1">Nome é obrigatório.</p>}
         </div>
 
         {/* Tipo */}
-        <div className="flex flex-col">
-          <label htmlFor="tipo" className="mb-1 text-gray-700 dark:text-gray-300">
+        <div>
+          <label htmlFor="tipo" className="mb-1 text-gray-700 dark:text-gray-300 block">
             Tipo de Ativo
           </label>
           <select
@@ -99,33 +90,21 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
             value={tipo}
             onChange={e => setTipo(e.target.value)}
             onBlur={() => setTouched(prev => ({ ...prev, tipo: true }))}
-            className={`border rounded p-2 w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
-              focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                tipoError ? 'border-red-500' : 'border-gray-300'
-              }`}
-            aria-required="true"
+            className={`${inputBaseStyle} ${tipoError ? 'border-red-500' : 'border-gray-300'}`}
             aria-invalid={tipoError}
-            aria-describedby="tipo-error"
+            aria-describedby={tipoError ? 'tipo-error' : undefined}
           >
-            <option value="" disabled>
-              Selecione o tipo
-            </option>
-            {tiposAtivo.map(tipoItem => (
-              <option key={tipoItem} value={tipoItem}>
-                {tipoItem}
-              </option>
+            <option value="" disabled>Selecione o tipo</option>
+            {tiposAtivo.map(opcao => (
+              <option key={opcao} value={opcao}>{opcao}</option>
             ))}
           </select>
-          {tipoError && (
-            <span id="tipo-error" className="text-red-600 text-sm mt-1">
-              Tipo é obrigatório.
-            </span>
-          )}
+          {tipoError && <p id="tipo-error" className="text-red-600 text-sm mt-1">Tipo é obrigatório.</p>}
         </div>
 
         {/* Valor */}
-        <div className="flex flex-col">
-          <label htmlFor="valor" className="mb-1 text-gray-700 dark:text-gray-300">
+        <div>
+          <label htmlFor="valor" className="mb-1 text-gray-700 dark:text-gray-300 block">
             Valor (R$)
           </label>
           <div className="relative">
@@ -135,32 +114,21 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
               type="number"
               placeholder="Ex: 1500.50"
               value={valor}
-              onChange={e => {
-                const val = e.target.value
-                setValor(val === '' ? '' : Number(val))
-              }}
+              onChange={e => setValor(e.target.value === '' ? '' : Number(e.target.value))}
               onBlur={() => setTouched(prev => ({ ...prev, valor: true }))}
-              className={`border rounded p-2 pl-8 w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  valorError ? 'border-red-500' : 'border-gray-300'
-                }`}
+              className={`${inputBaseStyle} pl-8 ${valorError ? 'border-red-500' : 'border-gray-300'}`}
               min={0}
               step="0.01"
-              aria-required="true"
               aria-invalid={valorError}
-              aria-describedby="valor-error"
+              aria-describedby={valorError ? 'valor-error' : undefined}
             />
           </div>
-          {valorError && (
-            <span id="valor-error" className="text-red-600 text-sm mt-1">
-              Valor deve ser maior que zero.
-            </span>
-          )}
+          {valorError && <p id="valor-error" className="text-red-600 text-sm mt-1">Valor deve ser maior que zero.</p>}
         </div>
 
         {/* Data de Compra */}
-        <div className="flex flex-col">
-          <label htmlFor="dataCompra" className="mb-1 text-gray-700 dark:text-gray-300">
+        <div>
+          <label htmlFor="dataCompra" className="mb-1 text-gray-700 dark:text-gray-300 block">
             Data de Compra
           </label>
           <div className="relative">
@@ -171,39 +139,28 @@ const AtivoForm: React.FC<AtivoFormProps> = ({
               value={dataCompra.toISOString().slice(0, 10)}
               onChange={e => setDataCompra(new Date(e.target.value))}
               onBlur={() => setTouched(prev => ({ ...prev, dataCompra: true }))}
-              className={`border rounded p-2 pl-8 w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  dataError ? 'border-red-500' : 'border-gray-300'
-                }`}
-              aria-required="true"
+              className={`${inputBaseStyle} pl-8 ${dataError ? 'border-red-500' : 'border-gray-300'}`}
               aria-invalid={dataError}
-              aria-describedby="data-error"
+              aria-describedby={dataError ? 'data-error' : undefined}
             />
           </div>
-          {dataError && (
-            <span id="data-error" className="text-red-600 text-sm mt-1">
-              Data de compra é obrigatória.
-            </span>
-          )}
+          {dataError && <p id="data-error" className="text-red-600 text-sm mt-1">Data de compra é obrigatória.</p>}
         </div>
 
-        {/* Botão Adicionar */}
+        {/* Botão */}
         <button
           type="submit"
           disabled={!isFormValid || loading}
-          className={`mt-2 py-2 px-4 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+          className={`mt-2 py-2 px-4 rounded text-white transition ${
             !isFormValid || loading
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-blue-500 hover:bg-blue-600'
           }`}
-          aria-disabled={!isFormValid || loading}
         >
           {loading ? 'Adicionando...' : 'Adicionar Ativo'}
         </button>
 
-        {errorMessage && (
-          <p className="text-red-600 text-sm mt-1">{errorMessage}</p>
-        )}
+        {errorMessage && <p className="text-red-600 text-sm mt-2">{errorMessage}</p>}
       </form>
     </div>
   )

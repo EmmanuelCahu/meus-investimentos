@@ -1,14 +1,52 @@
-import { InputHTMLAttributes } from "react";
+import React from "react";
+import { cn } from "@/lib/utils";
 
-interface CheckboxProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
 }
 
-const Checkbox = ({ label, ...props }: CheckboxProps) => (
-  <label className="inline-flex items-center space-x-2 cursor-pointer">
-    <input type="checkbox" className="form-checkbox rounded text-blue-600" {...props} />
-    <span>{label}</span>
-  </label>
+const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
+  ({ label, error, className, id, ...props }, ref) => {
+    const checkboxId = id || props.name || `checkbox-${Math.random().toString(36).slice(2, 11)}`;
+
+    return (
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id={checkboxId}
+          ref={ref}
+          className={cn(
+            "h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500",
+            error ? "border-red-500 focus:ring-red-500" : "",
+            className
+          )}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${checkboxId}-error` : undefined}
+          {...props}
+        />
+        {label && (
+          <label
+            htmlFor={checkboxId}
+            className="select-none text-sm text-gray-700"
+          >
+            {label}
+          </label>
+        )}
+        {error && (
+          <p
+            id={`${checkboxId}-error`}
+            role="alert"
+            className="ml-8 text-xs text-red-600"
+          >
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
 );
+
+Checkbox.displayName = "Checkbox";
 
 export default Checkbox;

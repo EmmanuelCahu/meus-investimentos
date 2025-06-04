@@ -1,58 +1,59 @@
-import React from 'react'
-import { Ativo } from './types'
+import React from 'react';
+import { Ativo } from './types';
+import { Trash2 } from 'lucide-react';
 
 interface PaginatedTableProps {
-  ativos: Ativo[]
-  loadingAtivos: boolean
-  deleteId: string | null
-  setDeleteId: React.Dispatch<React.SetStateAction<string | null>>
-  currentPage: number
-  setCurrentPage: React.Dispatch<React.SetStateAction<number>>
-  itemsPerPage: number
+  data: Ativo[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onDelete: (id: string) => void;
 }
 
 const PaginatedTable: React.FC<PaginatedTableProps> = ({
-  ativos,
-  loadingAtivos,
-  deleteId,
-  setDeleteId,
+  data,
   currentPage,
-  setCurrentPage,
-  itemsPerPage,
+  totalPages,
+  onPageChange,
+  onDelete,
 }) => {
-  const totalPages = Math.ceil(ativos.length / itemsPerPage)
-  const pagedAtivos = ativos.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
-
-  if (loadingAtivos) return <p>Carregando ativos...</p>
-  if (ativos.length === 0) return <p className="text-gray-500">Nenhum ativo encontrado.</p>
+  if (data.length === 0) {
+    return <p className="text-center py-4 text-gray-600 dark:text-gray-400">Nenhum dado para exibir.</p>;
+  }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse" role="table" aria-label="Tabela de ativos">
-        <thead className="bg-gray-100 dark:bg-gray-700">
+    <div className="overflow-x-auto mt-6">
+      <table className="min-w-full border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+        <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
           <tr>
-            <th className="border p-2 text-left">Nome</th>
-            <th className="border p-2 text-left">Tipo</th>
-            <th className="border p-2 text-right">Valor</th>
-            <th className="border p-2 text-center">Ações</th>
+            <th className="py-2 px-4 text-left">Nome</th>
+            <th className="py-2 px-4 text-left">Tipo</th>
+            <th className="py-2 px-4 text-right">Valor (R$)</th>
+            <th className="py-2 px-4 text-center">Data Compra</th>
+            <th className="py-2 px-4 text-center">Ações</th>
           </tr>
         </thead>
         <tbody>
-          {pagedAtivos.map(ativo => (
-            <tr key={ativo.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-              <td className="border p-2">{ativo.nome}</td>
-              <td className="border p-2">{ativo.tipo}</td>
-              <td className="border p-2 text-right">R$ {ativo.valor.toFixed(2)}</td>
-              <td className="border p-2 text-center">
+          {data.map(ativo => (
+            <tr
+              key={ativo.id}
+              className="border-t border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+            >
+              <td className="py-2 px-4">{ativo.nome}</td>
+              <td className="py-2 px-4">{ativo.tipo}</td>
+              <td className="py-2 px-4 text-right">
+                {ativo.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </td>
+              <td className="py-2 px-4 text-center">
+                {new Date(ativo.dataCompra.seconds ? ativo.dataCompra.seconds * 1000 : ativo.dataCompra).toLocaleDateString('pt-BR')}
+              </td>
+              <td className="py-2 px-4 text-center">
                 <button
-                  onClick={() => setDeleteId(ativo.id)}
-                  className="text-red-600 hover:underline"
-                  aria-label={`Remover ativo ${ativo.nome}`}
+                  aria-label={`Excluir ativo ${ativo.nome}`}
+                  onClick={() => onDelete(ativo.id)}
+                  className="text-red-600 hover:text-red-800 transition-colors"
                 >
-                  Remover
+                  <Trash2 size={18} />
                 </button>
               </td>
             </tr>
@@ -61,23 +62,47 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
       </table>
 
       {/* Paginação */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-4 gap-2">
-          {[...Array(totalPages)].map((_, i) => (
+      <nav
+        className="mt-4 flex justify-center items-center gap-3"
+        aria-label="Navegação de páginas"
+      >
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40"
+          aria-disabled={currentPage === 1}
+          aria-label="Página anterior"
+        >
+          ‹
+        </button>
+        {[...Array(totalPages)].map((_, i) => {
+          const page = i + 1;
+          const isActive = page === currentPage;
+          return (
             <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded ${
-                currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white'
+              key={page}
+              onClick={() => onPageChange(page)}
+              aria-current={isActive ? 'page' : undefined}
+              className={`px-3 py-1 rounded border border-gray-300 dark:border-gray-600 ${
+                isActive ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
-              {i + 1}
+              {page}
             </button>
-          ))}
-        </div>
-      )}
+          );
+        })}
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40"
+          aria-disabled={currentPage === totalPages}
+          aria-label="Próxima página"
+        >
+          ›
+        </button>
+      </nav>
     </div>
-  )
-}
+  );
+};
 
-export default PaginatedTable
+export default PaginatedTable;

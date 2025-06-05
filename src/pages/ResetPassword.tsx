@@ -8,8 +8,8 @@ import Input from "../components/ui/Input";
 const ResetPassword: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
   const oobCode = searchParams.get("oobCode") || "";
+
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,19 +30,18 @@ const ResetPassword: React.FC = () => {
     try {
       const auth = getAuth();
       await confirmPasswordReset(auth, oobCode, newPassword);
-      setSuccess("Senha redefinida com sucesso! Você pode agora fazer login.");
-      setTimeout(() => {
-        navigate("/login");
-      }, 3000);
+      setSuccess("Senha redefinida com sucesso! Redirecionando para login...");
+      setTimeout(() => navigate("/login"), 3000);
     } catch (err: any) {
       setError(err.message || "Erro ao redefinir a senha.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (!oobCode) {
     return (
-      <div className="max-w-md mx-auto mt-20 p-6 border rounded shadow">
+      <div className="max-w-md mx-auto mt-20 p-6 border rounded shadow text-center">
         <p className="text-red-600">Código inválido ou ausente.</p>
         <Link to="/forgot-password" className="text-blue-500 hover:underline">
           Solicitar novo link
@@ -52,7 +51,7 @@ const ResetPassword: React.FC = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 border rounded shadow">
+    <div className="max-w-md mx-auto mt-20 p-6 border rounded shadow bg-white">
       <h1 className="text-2xl font-bold mb-4">Redefinir senha</h1>
       {success && <p className="text-green-600 mb-2">{success}</p>}
       {error && <p className="text-red-600 mb-2">{error}</p>}
@@ -74,12 +73,10 @@ const ResetPassword: React.FC = () => {
         <Button type="submit" disabled={loading}>
           {loading ? "Redefinindo..." : "Redefinir senha"}
         </Button>
-      </form>
-      <div className="mt-4 text-sm">
-        <Link to="/login" className="text-blue-500 hover:underline">
+        <Link to="/login" className="text-blue-500 hover:underline text-sm text-center">
           Voltar para login
         </Link>
-      </div>
+      </form>
     </div>
   );
 };

@@ -16,63 +16,63 @@ const Login: React.FC = () => {
       await signInWithEmailAndPassword(auth, email, senha);
       navigate("/ativos");
     } catch (err: any) {
-      setErro(err.message);
+      setErro("Email ou senha inválidos. Tente novamente.");
     }
   };
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-white">
-      {/* Esquerda - Imagem maior e centralizada */}
-      <div className="hidden md:flex md:w-1/2 items-center justify-center p-6">
-        <img
-          src="/Main.png"
-          alt="Imagem ilustrativa"
-          className="w-full max-w-[85%] h-auto object-contain"
-        />
+      {/* Imagem lado esquerdo */}
+      <div className="hidden md:flex md:w-1/2 items-center justify-center bg-gray-100 p-6">
+        <img src="/Main.png" alt="Imagem" className="max-w-[90%] max-h-[90%]" />
       </div>
 
-      {/* Direita - Logo + Formulário */}
-      <div className="flex flex-1 flex-col justify-center items-center px-6 py-8 md:w-1/2 relative">
-        {/* Logo acima do formulário */}
-        <motion.img
-          src="/logo-meus-investimentos.png"
-          alt="Meus Investimentos"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="w-[140px] h-auto mb-6 md:absolute md:top-12"
-        />
+      {/* Formulário lado direito */}
+      <div className="flex w-full md:w-1/2 flex-col justify-center items-center px-6 py-12">
+        <div className="w-full max-w-sm space-y-6">
+          {/* Logo no topo (mobile ou desktop) */}
+          <div className="flex justify-center mb-4">
+            <motion.img
+              src="/logo-meus-investimentos.png"
+              alt="Meus Investimentos"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="w-40"
+            />
+          </div>
 
-        <div className="w-full max-w-xs space-y-4 mt-6">
+          <h2 className="text-center text-xl font-semibold text-gray-700">Entrar na sua conta</h2>
+
           <form onSubmit={handleLogin} className="space-y-4">
             <input
               type="email"
-              placeholder="Email"
+              placeholder="Seu email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded px-3 py-1.5 text-sm"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
             <input
               type="password"
-              placeholder="Senha"
+              placeholder="Sua senha"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              className="w-full border rounded px-3 py-1.5 text-sm"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
             {erro && <p className="text-red-500 text-sm">{erro}</p>}
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-1.5 rounded hover:bg-blue-700 text-sm"
+              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm"
             >
-              Login
+              Entrar
             </button>
 
-            <div className="flex justify-between text-xs mt-2">
-              <Link to="/forgot-password" className="text-blue-600">Esqueci a senha</Link>
-              <Link to="/signup" className="text-blue-600">Criar conta</Link>
+            <div className="flex justify-between text-sm text-gray-600 mt-2">
+              <Link to="/forgot-password" className="hover:underline">Esqueci a senha</Link>
+              <Link to="/signup" className="hover:underline">Criar conta</Link>
             </div>
           </form>
         </div>

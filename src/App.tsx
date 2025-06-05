@@ -8,14 +8,11 @@ import Mercado from "./pages/Mercado";
 import Educacao from "./pages/Educacao";
 import Dashboard from "./pages/Dashboard";
 
-import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
+import AuthContainer from "./pages/AuthContainer";
 
 import Navbar from "./components/Navbar";
 import { useAuthStatus } from "./hooks/useAuthStatus";
 
-// Componente para proteger rotas privadas
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const { user, loading } = useAuthStatus();
 
@@ -49,11 +46,8 @@ const App: React.FC = () => {
     <BrowserRouter>
       {user && <Navbar />}
       <Routes>
-        {/* Rotas públicas */}
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        {/* Rota pública única para autenticação */}
+        <Route path="/" element={<AuthContainer />} />
 
         {/* Rotas privadas */}
         <Route

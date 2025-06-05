@@ -1,3 +1,4 @@
+// src/App.tsx
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
@@ -11,10 +12,11 @@ import Dashboard from "./pages/Dashboard";
 import AuthContainer from "./pages/AuthContainer";
 
 import Navbar from "./components/Navbar";
-import { useAuthStatus } from "./hooks/useAuthStatus";
+import { useAuth } from "./components/AuthContext";
+import { AuthProvider } from "./components/AuthContext";
 
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
-  const { user, loading } = useAuthStatus();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -31,25 +33,15 @@ const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   return children;
 };
 
-const App: React.FC = () => {
-  const { user, loading } = useAuthStatus();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-lg font-medium">Carregando...</p>
-      </div>
-    );
-  }
+const AppRoutes: React.FC = () => {
+  const { user } = useAuth();
 
   return (
-    <BrowserRouter>
+    <>
       {user && <Navbar />}
       <Routes>
-        {/* Rota pública única para autenticação */}
         <Route path="/" element={<AuthContainer />} />
 
-        {/* Rotas privadas */}
         <Route
           path="/dashboard"
           element={
@@ -91,13 +83,22 @@ const App: React.FC = () => {
           }
         />
 
-        {/* Redirecionamento geral */}
         <Route
           path="*"
           element={<Navigate to={user ? "/dashboard" : "/"} replace />}
         />
       </Routes>
-    </BrowserRouter>
+    </>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
   );
 };
 

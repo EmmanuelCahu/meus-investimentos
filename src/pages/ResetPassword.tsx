@@ -1,4 +1,3 @@
-// src/pages/ResetPassword.tsx
 import React, { useState } from "react";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
@@ -10,7 +9,7 @@ const ResetPassword: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const oobCode = searchParams.get("oobCode") || ""; // Código do link de reset enviado por email
+  const oobCode = searchParams.get("oobCode") || "";
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

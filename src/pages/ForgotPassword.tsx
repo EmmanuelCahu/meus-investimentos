@@ -13,19 +13,20 @@ const ForgotPassword: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMensagem("");
+    setErro("");
+
     try {
       await sendPasswordResetEmail(auth, email);
-      setMensagem("Email de recuperação enviado!");
-      setErro("");
+      setMensagem("Email de recuperação enviado com sucesso!");
     } catch (err: any) {
-      setErro(err.message);
-      setMensagem("");
+      setErro(err.message || "Erro ao enviar o email.");
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 p-6 bg-white rounded shadow">
         <h2 className="text-2xl font-bold text-center mb-4">Recuperar Senha</h2>
         <Input
           type="email"

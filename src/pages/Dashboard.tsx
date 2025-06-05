@@ -1,13 +1,36 @@
-// src/pages/Dashboard.tsx
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, LineChart, Line, Legend } from "recharts";
-import useAtivosData from "@/hooks/useAtivosData";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  LineChart,
+  Line,
+  Legend,
+} from "recharts";
+import { useAtivosData } from "@/hooks/useAtivosData";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50", "#0088FE", "#00C49F"];
 
 const Dashboard: React.FC = () => {
-  const { ativos, totalInvestido, totalRentabilidade, distribuicaoPorTipo, historicoPatrimonio } = useAtivosData();
+  const {
+    ativos,
+    loading,
+    totalInvestido,
+    totalRentabilidade,
+    distribuicaoPorTipo,
+    historicoPatrimonio,
+  } = useAtivosData();
+
+  if (loading) {
+    return <div className="p-4">Carregando dados...</div>;
+  }
 
   return (
     <div className="p-4 space-y-6">
@@ -18,7 +41,7 @@ const Dashboard: React.FC = () => {
         <Card>
           <CardContent>
             <p className="text-sm text-gray-500">Total Investido</p>
-            <p className="text-xl font-bold">R$ {totalInvestido.toLocaleString()}</p>
+            <p className="text-xl font-bold">R$ {totalInvestido.toLocaleString("pt-BR")}</p>
           </CardContent>
         </Card>
         <Card>
@@ -53,7 +76,7 @@ const Dashboard: React.FC = () => {
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number) => `R$ ${value.toLocaleString()}`} />
+            <Tooltip formatter={(value: number) => `R$ ${value.toLocaleString("pt-BR")}`} />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -65,7 +88,7 @@ const Dashboard: React.FC = () => {
           <LineChart data={historicoPatrimonio}>
             <XAxis dataKey="mes" />
             <YAxis />
-            <Tooltip formatter={(value: number) => `R$ ${value.toLocaleString()}`} />
+            <Tooltip formatter={(value: number) => `R$ ${value.toLocaleString("pt-BR")}`} />
             <Legend />
             <Line type="monotone" dataKey="valor" stroke="#8884d8" strokeWidth={2} />
           </LineChart>

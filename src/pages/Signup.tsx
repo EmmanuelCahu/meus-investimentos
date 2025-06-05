@@ -33,7 +33,7 @@ const Signup: React.FC = () => {
         />
         <input
           type="password"
-          placeholder="Senha"
+          placeholder="Senha" 
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
           className="w-full border rounded px-4 py-2"

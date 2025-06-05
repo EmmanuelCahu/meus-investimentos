@@ -12,8 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import AuthContainer from "./pages/AuthContainer";
 
 import Navbar from "./components/Navbar";
-import { useAuth } from "./components/AuthContext";
-import { AuthProvider } from "./components/AuthContext";
+import { useAuth, AuthProvider } from "./components/AuthContext";
 
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const { user, loading } = useAuth();

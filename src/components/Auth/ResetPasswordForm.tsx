@@ -12,20 +12,21 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit, isLoadi
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
 
-  function validate() {
+  const validate = () => {
     const newErrors: typeof errors = {};
     if (!password) newErrors.password = "Senha é obrigatória";
     if (!confirmPassword) newErrors.confirmPassword = "Confirmação de senha é obrigatória";
-    if (password && confirmPassword && password !== confirmPassword) newErrors.confirmPassword = "Senhas não coincidem";
+    if (password && confirmPassword && password !== confirmPassword)
+      newErrors.confirmPassword = "Senhas não coincidem";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }
+  };
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
     await onSubmit({ password, confirmPassword });
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -37,6 +38,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit, isLoadi
         onChange={(e) => setPassword(e.target.value)}
         error={errors.password}
         autoComplete="new-password"
+        required
         disabled={isLoading}
       />
       <Input
@@ -47,6 +49,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit, isLoadi
         onChange={(e) => setConfirmPassword(e.target.value)}
         error={errors.confirmPassword}
         autoComplete="new-password"
+        required
         disabled={isLoading}
         className="mt-4"
       />

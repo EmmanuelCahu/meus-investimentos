@@ -12,20 +12,20 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  function validate() {
+  const validate = () => {
     const newErrors: typeof errors = {};
     if (!email) newErrors.email = "Email é obrigatório";
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email inválido";
     if (!password) newErrors.password = "Senha é obrigatória";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }
+  };
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
     await onSubmit({ email, password });
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -37,6 +37,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
         onChange={(e) => setEmail(e.target.value)}
         error={errors.email}
         autoComplete="email"
+        required
         disabled={isLoading}
       />
       <Input
@@ -47,6 +48,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
         onChange={(e) => setPassword(e.target.value)}
         error={errors.password}
         autoComplete="current-password"
+        required
         disabled={isLoading}
         className="mt-4"
       />

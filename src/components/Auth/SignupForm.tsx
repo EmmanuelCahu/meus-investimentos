@@ -13,22 +13,23 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
 
-  function validate() {
+  const validate = () => {
     const newErrors: typeof errors = {};
     if (!email) newErrors.email = "Email é obrigatório";
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email inválido";
     if (!password) newErrors.password = "Senha é obrigatória";
     if (!confirmPassword) newErrors.confirmPassword = "Confirmação de senha é obrigatória";
-    if (password && confirmPassword && password !== confirmPassword) newErrors.confirmPassword = "Senhas não coincidem";
+    if (password && confirmPassword && password !== confirmPassword)
+      newErrors.confirmPassword = "Senhas não coincidem";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }
+  };
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
     await onSubmit({ email, password, confirmPassword });
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -40,6 +41,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
         onChange={(e) => setEmail(e.target.value)}
         error={errors.email}
         autoComplete="email"
+        required
         disabled={isLoading}
       />
       <Input
@@ -50,6 +52,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
         onChange={(e) => setPassword(e.target.value)}
         error={errors.password}
         autoComplete="new-password"
+        required
         disabled={isLoading}
         className="mt-4"
       />
@@ -61,6 +64,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
         onChange={(e) => setConfirmPassword(e.target.value)}
         error={errors.confirmPassword}
         autoComplete="new-password"
+        required
         disabled={isLoading}
         className="mt-4"
       />

@@ -11,23 +11,24 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSubmit, isLoa
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string>();
 
-  function validate() {
+  const validate = () => {
     if (!email) {
       setError("Email é obrigatório");
       return false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
       setError("Email inválido");
       return false;
     }
     setError(undefined);
     return true;
-  }
+  };
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
     await onSubmit(email);
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -39,6 +40,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSubmit, isLoa
         onChange={(e) => setEmail(e.target.value)}
         error={error}
         autoComplete="email"
+        required
         disabled={isLoading}
       />
       <Button type="submit" isLoading={isLoading} className="mt-6 w-full">

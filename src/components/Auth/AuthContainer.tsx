@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import AuthTabs from "./AuthTabs";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
@@ -6,121 +8,183 @@ import ForgotPasswordForm from "./ForgotPasswordForm";
 import ResetPasswordForm from "./ResetPasswordForm";
 import Alerts from "./Alerts";
 
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, confirmPasswordReset } from "firebase/auth";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  confirmPasswordReset,
+} from "firebase/auth";
 
 interface AuthContainerProps {
-  oobCode?: string; // código para reset de senha enviado no link
-  onSuccessLogin: () => void; // callback após login bem-sucedido
+  oobCode?: string;
+  defaultTab?: "login" | "signup" | "forgot" | "reset";
+  onSuccessLogin: () => void;
 }
 
-const AuthContainer: React.FC<AuthContainerProps> = ({ oobCode, onSuccessLogin }) => {
+const AuthContainer: React.FC<AuthContainerProps> = ({
+  oobCode,
+  defaultTab = "login",
+  onSuccessLogin,
+}) => {
   const auth = getAuth();
 
-  // Define tab inicial: se tem oobCode, forçamos a aba reset, senão login
-  const [currentTab, setCurrentTab] = useState<"login" | "signup" | "forgot" | "reset">(oobCode ? "reset" : "login");
+  const [currentTab, setCurrentTab] = useState<"login" | "signup" | "forgot" | "reset">(
+    oobCode ? "reset" : defaultTab
+  );
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>();
   const [successMsg, setSuccessMsg] = useState<string>();
 
-  async function handleLogin({ email, password }: { email: string; password: string }) {
-    setLoading(true);
+  useEffect(() => {
+    if (oobCode) {
+      setCurrentTab("reset");
+    }
+  }, [oobCode]);
+
+  const clearMessages = () => {
     setErrorMsg(undefined);
     setSuccessMsg(undefined);
+  };
+
+  const handleLogin = async ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => {
+    setLoading(true);
+    clearMessages();
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setSuccessMsg("Login realizado com sucesso!");
-      setTimeout(() => {
-        onSuccessLogin();
-      }, 1000);
+      setTimeout(onSuccessLogin, 1000);
     } catch (error: any) {
       setErrorMsg(getFriendlyError(error));
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function handleSignup({ email, password }: { email: string; password: string; confirmPassword: string }) {
+  const handleSignup = async ({
+    email,
+    password,
+    confirmPassword,
+  }: {
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }) => {
     setLoading(true);
-    setErrorMsg(undefined);
-    setSuccessMsg(undefined);
+    clearMessages();
+
+    if (password !== confirmPassword) {
+      setErrorMsg("As senhas não coincidem.");
+      setLoading(false);
+      return;
+    }
+
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       setSuccessMsg("Cadastro realizado com sucesso! Você já está logado.");
-      setTimeout(() => {
-        onSuccessLogin();
-      }, 1000);
+      setTimeout(onSuccessLogin, 1000);
     } catch (error: any) {
       setErrorMsg(getFriendlyError(error));
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function handleForgotPassword(email: string) {
+  const handleForgotPassword = async (email: string) => {
     setLoading(true);
-    setErrorMsg(undefined);
-    setSuccessMsg(undefined);
+    clearMessages();
     try {
       await sendPasswordResetEmail(auth, email);
-      setSuccessMsg("Email enviado! Verifique sua caixa de entrada.");
+      setSuccessMsg("Email enviado com sucesso! Verifique sua caixa de entrada.");
       setCurrentTab("login");
     } catch (error: any) {
       setErrorMsg(getFriendlyError(error));
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function handleResetPassword({ password }: { password: string; confirmPassword: string }) {
+  const handleResetPassword = async ({
+    password,
+    confirmPassword,
+  }: {
+    password: string;
+    confirmPassword: string;
+  }) => {
     if (!oobCode) {
       setErrorMsg("Código inválido ou expirado.");
       return;
     }
+
+    if (password !== confirmPassword) {
+      setErrorMsg("As senhas não coincidem.");
+      return;
+    }
+
     setLoading(true);
-    setErrorMsg(undefined);
-    setSuccessMsg(undefined);
+    clearMessages();
+
     try {
       await confirmPasswordReset(auth, oobCode, password);
-      setSuccessMsg("Senha alterada com sucesso! Faça login agora.");
+      setSuccessMsg("Senha alterada com sucesso! Faça login.");
       setCurrentTab("login");
     } catch (error: any) {
       setErrorMsg(getFriendlyError(error));
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  function getFriendlyError(error: any): string {
-    // Personalizar mensagens mais comuns de erro Firebase
+  const getFriendlyError = (error: any): string => {
     if (!error || !error.code) return "Erro desconhecido. Tente novamente.";
-    switch (error.code) {
-      case "auth/user-not-found":
-        return "Usuário não encontrado.";
-      case "auth/wrong-password":
-        return "Senha incorreta.";
-      case "auth/email-already-in-use":
-        return "Este email já está em uso.";
-      case "auth/invalid-email":
-        return "Email inválido.";
-      case "auth/weak-password":
-        return "Senha fraca. Use pelo menos 6 caracteres.";
-      case "auth/expired-action-code":
-        return "O código para alteração de senha expirou.";
-      case "auth/invalid-action-code":
-        return "Código inválido.";
-      default:
-        return error.message || "Erro desconhecido. Tente novamente.";
-    }
-  }
+
+    const map: Record<string, string> = {
+      "auth/user-not-found": "Usuário não encontrado.",
+      "auth/wrong-password": "Senha incorreta.",
+      "auth/email-already-in-use": "Este email já está em uso.",
+      "auth/invalid-email": "Email inválido.",
+      "auth/weak-password": "Senha fraca. Use pelo menos 6 caracteres.",
+      "auth/expired-action-code": "O código de redefinição expirou.",
+      "auth/invalid-action-code": "Código inválido ou expirado.",
+      "auth/missing-password": "A senha é obrigatória.",
+    };
+
+    return map[error.code] || error.message || "Erro desconhecido. Tente novamente.";
+  };
 
   return (
-    <div className="max-w-md w-full mx-auto p-6 bg-white rounded-md shadow-md">
-      <AuthTabs currentTab={currentTab} onChangeTab={(tab) => { setErrorMsg(undefined); setSuccessMsg(undefined); setCurrentTab(tab); }} />
+    <div className="max-w-md w-full mx-auto p-6 bg-white rounded-md shadow-lg">
+      <AuthTabs
+        currentTab={currentTab}
+        onChangeTab={(tab) => {
+          clearMessages();
+          setCurrentTab(tab);
+        }}
+      />
+
       <Alerts error={errorMsg} success={successMsg} />
-      {currentTab === "login" && <LoginForm onSubmit={handleLogin} isLoading={loading} />}
-      {currentTab === "signup" && <SignupForm onSubmit={handleSignup} isLoading={loading} />}
-      {currentTab === "forgot" && <ForgotPasswordForm onSubmit={handleForgotPassword} isLoading={loading} />}
-      {currentTab === "reset" && <ResetPasswordForm onSubmit={handleResetPassword} isLoading={loading} />}
+
+      {currentTab === "login" && (
+        <LoginForm onSubmit={handleLogin} isLoading={loading} />
+      )}
+
+      {currentTab === "signup" && (
+        <SignupForm onSubmit={handleSignup} isLoading={loading} />
+      )}
+
+      {currentTab === "forgot" && (
+        <ForgotPasswordForm onSubmit={handleForgotPassword} isLoading={loading} />
+      )}
+
+      {currentTab === "reset" && (
+        <ResetPasswordForm onSubmit={handleResetPassword} isLoading={loading} />
+      )}
     </div>
   );
 };

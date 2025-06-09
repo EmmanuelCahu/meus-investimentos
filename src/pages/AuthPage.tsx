@@ -1,7 +1,7 @@
-// src/pages/AuthPage.tsx
 import React, { useEffect, useReducer, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from './firebase/config';
+import { auth } from '../firebase/config'; // corrigido caminho
+
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -258,30 +258,40 @@ const AuthPage: React.FC = () => {
                   onClick={() => dispatch({ type: 'SET_VIEW', view: 'forgot' })}
                 >
                   Esqueci minha senha
-                </button>
-                <button
-                  type="button"
-                  className="text-blue-600 hover:underline"
-                  onClick={() => dispatch({ type: 'SET_VIEW', view: 'signup' })}
-                >
-                  Criar conta
-                </button>
-              </>
-            )}
-            {view !== 'login' && (
-              <button
-                type="button"
-                className="text-blue-600 hover:underline"
-                onClick={() => dispatch({ type: 'SET_VIEW', view: 'login' })}
-              >
-                Voltar para login
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+                </button
+/button>
+<button
+type="button"
+className="text-blue-600 hover:underline"
+onClick={() => dispatch({ type: 'SET_VIEW', view: 'signup' })}
+>
+Criar conta
+</button>
+</>
+)}
+{view === 'signup' && (
+<button
+type="button"
+className="text-blue-600 hover:underline"
+onClick={() => dispatch({ type: 'SET_VIEW', view: 'login' })}
+>
+Já tem conta? Entrar
+</button>
+)}
+{view === 'forgot' && (
+<button
+type="button"
+className="text-blue-600 hover:underline"
+onClick={() => dispatch({ type: 'SET_VIEW', view: 'login' })}
+>
+Voltar para login
+</button>
+)}
+</div>
+</div>
+</div>
+</div>
+);
 };
 
-export { AuthPage };
+export default AuthPage;

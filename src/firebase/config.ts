@@ -5,7 +5,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBS2q52cu5YHiD8o77FL9hKhUso96HZMXw",
   authDomain: "investcahu.firebaseapp.com",
   projectId: "investcahu",
-  storageBucket: "investcahu.firebasestorage.app",
+  storageBucket: "investcahu.appspot.com",
   messagingSenderId: "346068595798",
   appId: "1:346068595798:web:cf1bb568944b1a522b77f7",
   measurementId: "G-HCEQ2YCW55"
@@ -13,5 +13,4 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 
-// Adicionado exportação do auth para ser usado em todo o app
 export const auth = getAuth(app);

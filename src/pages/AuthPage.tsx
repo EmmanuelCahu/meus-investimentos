@@ -1,3 +1,127 @@
+a// src/pages/AuthPage.tsx
+import React, { useState } from 'react';
+import LoginForm from '@/components/auth/LoginForm';
+import SignUpForm from '@/components/auth/SignUpForm';
+import { auth } from '@/firebase/config';
+import { sendPasswordResetEmail } from 'firebase/auth';
+
+type View = 'login' | 'signup' | 'forgot';
+
+const AuthPage: React.FC = () => {
+  const [view, setView] = useState<View>('login');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+    setError(null);
+
+    if (!email) {
+      setError('Por favor, insira seu e-mail.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await sendPasswordResetEmail(auth, email);
+      setMessage('Email de recuperação enviado.');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex">
+      {/* Lado esquerdo com imagem */}
+      <div className="hidden md:flex w-1/2 bg-yellow-500 items-center justify-center">
+        <img
+          src="/login-image.svg" // Substitua pela sua imagem real
+          alt="Investimentos"
+          className="w-3/4 h-auto"
+        />
+      </div>
+
+      {/* Lado direito com formulário */}
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full p-8">
+          {view === 'login' && (
+            <>
+              <h2 className="text-2xl font-bold mb-6 text-center">Acesse sua conta</h2>
+              <LoginForm
+                onLoadingChange={setLoading}
+                onError={setError}
+                onSuccess={() => setMessage(null)}
+                disabled={loading}
+              />
+              <div className="flex justify-between text-sm mt-4">
+                <button onClick={() => setView('forgot')} className="text-blue-600 hover:underline">
+                  Esqueci minha senha
+                </button>
+                <button onClick={() => setView('signup')} className="text-blue-600 hover:underline">
+                  Criar conta
+                </button>
+              </div>
+            </>
+          )}
+
+          {view === 'signup' && (
+            <>
+              <h2 className="text-2xl font-bold mb-6 text-center">Criar nova conta</h2>
+              <SignUpForm
+                onLoadingChange={setLoading}
+                onError={setError}
+                onSuccess={() => setMessage(null)}
+                disabled={loading}
+              />
+              <div className="text-center text-sm mt-4">
+                <button onClick={() => setView('login')} className="text-blue-600 hover:underline">
+                  Já tem conta? Entrar
+                </button>
+              </div>
+            </>
+          )}
+
+          {view === 'forgot' && (
+            <>
+              <h2 className="text-2xl font-bold mb-6 text-center">Recuperar Senha</h2>
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <input
+                  type="email"
+                  placeholder="Digite seu email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-yellow-300"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-yellow-500 text-white py-3 rounded-md hover:bg-yellow-600 transition"
+                >
+                  {loading ? 'Enviando...' : 'Enviar link de recuperação'}
+                </button>
+              </form>
+              <div className="text-center text-sm mt-4">
+                <button onClick={() => setView('login')} className="text-blue-600 hover:underline">
+                  Voltar para login
+                </button>
+              </div>
+            </>
+          )}
+
+          {error && <div className="mt-4 text-red-600 text-sm text-center">{error}</div>}
+          {message && <div className="mt-4 text-green-600 text-sm text-center">{message}</div>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AuthPage;
 // src/pages/AuthPage.tsx
 import React, { useState } from 'react';
 import LoginForm from '@/components/auth/LoginForm';

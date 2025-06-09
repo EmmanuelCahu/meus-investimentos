@@ -1,13 +1,44 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Meus Investimentos</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+import React from "react";
+
+export default function Home() {
+  return (
+    <div className="flex min-h-screen bg-white">
+      {/* Coluna esquerda: espaço vazio para divisão */}
+      <div className="flex-1 flex justify-center items-center border-r border-gray-300"></div>
+
+      {/* Coluna meio: imagem centralizada */}
+      <div className="flex-1 flex justify-center items-center border-r border-gray-300">
+        <img
+          src="/sua-imagem.png" // coloque o caminho correto da imagem
+          alt="Imagem central"
+          className="max-w-full max-h-[80vh] object-contain"
+        />
+      </div>
+
+      {/* Coluna direita: formulário */}
+      <div className="flex-1 flex justify-center items-center">
+        <form className="w-full max-w-sm p-0 m-0 bg-white">
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full mb-4 px-3 py-2 text-gray-700 focus:outline-none"
+            style={{ border: "none" }}
+          />
+          <input
+            type="password"
+            placeholder="Senha"
+            className="w-full mb-6 px-3 py-2 text-gray-700 focus:outline-none"
+            style={{ border: "none" }}
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white py-2 px-4 rounded"
+            style={{ transform: "scale(0.5)", transformOrigin: "center" }}
+          >
+            Entrar
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

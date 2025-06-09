@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase/config';
 import AuthPage from './pages/AuthPage';
-import Dashboard from './pages/Dashboard'; // Exemplo, crie esta página conforme necessidade
+import Dashboard from './pages/Dashboard';
 
 const App: React.FC = () => {
-  const [user, setUser] = useState(auth.currentUser);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 

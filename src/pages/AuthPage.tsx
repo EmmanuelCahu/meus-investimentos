@@ -1,7 +1,6 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../firebase/config'; // corrigido caminho
-
+import { auth } from '../firebase/config'; // ✅ Correção aqui
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -43,36 +42,17 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_VIEW':
-      return {
-        ...initialState,
-        view: action.view,
-      };
+      return { ...initialState, view: action.view };
     case 'SET_FIELD':
-      return {
-        ...state,
-        [action.field]: action.value,
-      };
+      return { ...state, [action.field]: action.value };
     case 'SET_LOADING':
-      return {
-        ...state,
-        loading: action.loading,
-      };
+      return { ...state, loading: action.loading };
     case 'SET_ERROR':
-      return {
-        ...state,
-        error: action.message,
-      };
+      return { ...state, error: action.message };
     case 'SET_SUCCESS':
-      return {
-        ...state,
-        success: action.message,
-      };
+      return { ...state, success: action.message };
     case 'RESET_MESSAGES':
-      return {
-        ...state,
-        error: null,
-        success: null,
-      };
+      return { ...state, error: null, success: null };
     default:
       return state;
   }
@@ -80,8 +60,7 @@ function reducer(state: State, action: Action): State {
 
 const AuthPage: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { view, email, password, confirmPassword, loading, error, success, passwordVisible } =
-    state;
+  const { view, email, password, confirmPassword, loading, error, success, passwordVisible } = state;
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
 
@@ -109,8 +88,8 @@ const AuthPage: React.FC = () => {
         navigate('/dashboard', { replace: true });
       } else if (view === 'signup') {
         if (password !== confirmPassword) throw new Error('As senhas não coincidem.');
-        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
-        if (!passwordPattern.test(password))
+        const pattern = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+        if (!pattern.test(password))
           throw new Error('Senha deve ter letras e números, mínimo 6 caracteres.');
         await createUserWithEmailAndPassword(auth, email.trim(), password);
         dispatch({ type: 'SET_SUCCESS', message: 'Conta criada com sucesso!' });
@@ -119,9 +98,9 @@ const AuthPage: React.FC = () => {
         await sendPasswordResetEmail(auth, email.trim());
         dispatch({ type: 'SET_SUCCESS', message: 'Email de recuperação enviado!' });
       }
-    } catch (err: any) {
-      const msg = err?.message || 'Erro inesperado.';
-      dispatch({ type: 'SET_ERROR', message: msg });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro inesperado.';
+      dispatch({ type: 'SET_ERROR', message });
     } finally {
       dispatch({ type: 'SET_LOADING', loading: false });
     }
@@ -129,11 +108,8 @@ const AuthPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex bg-gray-100">
-      {/* Lado esquerdo vazio / neutro */}
-      <div className="w-1/3 bg-gray-100" />
-
-      {/* Centro: imagem Main.png */}
-      <div className="w-1/3 flex items-center justify-center bg-gray-100">
+      <div className="w-1/3 bg-gray-100 hidden lg:block" />
+      <div className="w-full lg:w-1/3 flex items-center justify-center bg-gray-100">
         <img
           src="/Main.png"
           alt="Imagem Principal"
@@ -142,18 +118,19 @@ const AuthPage: React.FC = () => {
           style={{ maxHeight: '80vh' }}
         />
       </div>
-
-      {/* Lado direito: formulário */}
-      <div className="w-1/3 flex items-center justify-center p-6 bg-white">
+      <div className="w-full lg:w-1/3 flex items-center justify-center p-6 bg-white">
         <div className="relative max-w-md w-full rounded-lg shadow-lg">
           {loading && (
             <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
             </div>
           )}
-
           <h2 className="text-2xl font-semibold mb-6 text-center">
-            {view === 'login' ? 'Entrar' : view === 'signup' ? 'Criar Conta' : 'Recuperar Senha'}
+            {view === 'login'
+              ? 'Entrar'
+              : view === 'signup'
+              ? 'Criar Conta'
+              : 'Recuperar Senha'}
           </h2>
 
           {(error || success) && (
@@ -174,7 +151,6 @@ const AuthPage: React.FC = () => {
             <input
               type="email"
               ref={emailRef}
-              aria-label="Email"
               placeholder="Email"
               autoComplete="username"
               className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-blue-300"
@@ -188,7 +164,6 @@ const AuthPage: React.FC = () => {
                 <div className="relative">
                   <input
                     type={passwordVisible ? 'text' : 'password'}
-                    aria-label="Senha"
                     placeholder="Senha"
                     autoComplete={view === 'login' ? 'current-password' : 'new-password'}
                     className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-blue-300"
@@ -202,9 +177,12 @@ const AuthPage: React.FC = () => {
                   />
                   <button
                     type="button"
-                    aria-label={passwordVisible ? 'Ocultar senha' : 'Mostrar senha'}
                     onClick={() =>
-                      dispatch({ type: 'SET_FIELD', field: 'passwordVisible', value: !passwordVisible })
+                      dispatch({
+                        type: 'SET_FIELD',
+                        field: 'passwordVisible',
+                        value: !passwordVisible,
+                      })
                     }
                     className="absolute inset-y-0 right-3 flex items-center text-gray-600"
                   >
@@ -214,14 +192,17 @@ const AuthPage: React.FC = () => {
                 {view === 'signup' && (
                   <input
                     type="password"
-                    aria-label="Confirmar senha"
                     placeholder="Confirmar senha"
                     autoComplete="new-password"
                     className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-blue-300"
                     value={confirmPassword}
                     disabled={loading}
                     onChange={(e) =>
-                      dispatch({ type: 'SET_FIELD', field: 'confirmPassword', value: e.target.value })
+                      dispatch({
+                        type: 'SET_FIELD',
+                        field: 'confirmPassword',
+                        value: e.target.value,
+                      })
                     }
                     minLength={6}
                     required
@@ -229,7 +210,6 @@ const AuthPage: React.FC = () => {
                 )}
               </>
             )}
-
             <button
               type="submit"
               disabled={loading}
@@ -250,7 +230,7 @@ const AuthPage: React.FC = () => {
           </form>
 
           <div className="mt-4 text-center text-sm">
-            {view === 'login' && (
+            {view === 'login' ? (
               <>
                 <button
                   type="button"
@@ -258,40 +238,29 @@ const AuthPage: React.FC = () => {
                   onClick={() => dispatch({ type: 'SET_VIEW', view: 'forgot' })}
                 >
                   Esqueci minha senha
-                </button
-/button>
-<button
-type="button"
-className="text-blue-600 hover:underline"
-onClick={() => dispatch({ type: 'SET_VIEW', view: 'signup' })}
->
-Criar conta
-</button>
-</>
-)}
-{view === 'signup' && (
-<button
-type="button"
-className="text-blue-600 hover:underline"
-onClick={() => dispatch({ type: 'SET_VIEW', view: 'login' })}
->
-Já tem conta? Entrar
-</button>
-)}
-{view === 'forgot' && (
-<button
-type="button"
-className="text-blue-600 hover:underline"
-onClick={() => dispatch({ type: 'SET_VIEW', view: 'login' })}
->
-Voltar para login
-</button>
-)}
-</div>
-</div>
-</div>
-</div>
-);
+                </button>
+                <button
+                  type="button"
+                  className="text-blue-600 hover:underline"
+                  onClick={() => dispatch({ type: 'SET_VIEW', view: 'signup' })}
+                >
+                  Criar conta
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="text-blue-600 hover:underline"
+                onClick={() => dispatch({ type: 'SET_VIEW', view: 'login' })}
+              >
+                Voltar para login
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
-export default AuthPage;
+export { AuthPage };

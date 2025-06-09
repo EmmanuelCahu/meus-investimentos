@@ -251,7 +251,7 @@ const AuthPage: React.FC = () => {
           </form>
 
           <div className="mt-4 text-center text-sm">
-            {view === 'login' && (、
+            {view === 'login' && (
               <>
                 <button
                   type="button"

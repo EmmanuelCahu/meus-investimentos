@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { auth } from './firebase/config';
 import AuthPage from './pages/AuthPage';
-import Dashboard from './pages/Dashboard'; // Exemplo, crie esta página conforme necessidade
+import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 
 const App: React.FC = () => {
   const [user, setUser] = useState(auth.currentUser);
@@ -27,6 +28,9 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Página inicial pública */}
+        <Route path="/" element={<Home />} />
+
         {/* Rota pública para autenticação */}
         <Route
           path="/auth"
@@ -37,12 +41,6 @@ const App: React.FC = () => {
         <Route
           path="/dashboard"
           element={user ? <Dashboard /> : <Navigate to="/auth" replace />}
-        />
-
-        {/* Redirecionar root para dashboard ou auth conforme login */}
-        <Route
-          path="/"
-          element={<Navigate to={user ? "/dashboard" : "/auth"} replace />}
         />
 
         {/* Catch-all: redireciona para root */}

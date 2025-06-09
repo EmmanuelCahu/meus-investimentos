@@ -43,7 +43,6 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_VIEW':
-      // Reset form fields and messages on view change
       return {
         ...initialState,
         view: action.view,
@@ -81,28 +80,19 @@ function reducer(state: State, action: Action): State {
 
 const AuthPage: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const {
-    view,
-    email,
-    password,
-    confirmPassword,
-    loading,
-    error,
-    success,
-    passwordVisible,
-  } = state;
+  const { view, email, password, confirmPassword, loading, error, success, passwordVisible } =
+    state;
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus email input on view change
+  // Auto-focus email when view changes
   useEffect(() => {
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       emailRef.current?.focus();
     }, 100);
-    return () => clearTimeout(timer);
   }, [view]);
 
-  // Clear success message after 5 seconds
+  // Clear success message after 5s
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => dispatch({ type: 'RESET_MESSAGES' }), 5000);
@@ -116,34 +106,19 @@ const AuthPage: React.FC = () => {
     dispatch({ type: 'SET_LOADING', loading: true });
 
     try {
-      const trimmedEmail = email.trim();
-
-      if (!trimmedEmail) {
-        throw new Error('Email é obrigatório.');
-      }
-
       if (view === 'login') {
-        if (!password) {
-          throw new Error('Senha é obrigatória.');
-        }
-        await signInWithEmailAndPassword(auth, trimmedEmail, password);
+        await signInWithEmailAndPassword(auth, email.trim(), password);
         navigate('/dashboard', { replace: true });
       } else if (view === 'signup') {
-        if (!password || !confirmPassword) {
-          throw new Error('Senha e confirmação são obrigatórias.');
-        }
-        if (password !== confirmPassword) {
-          throw new Error('As senhas não coincidem.');
-        }
+        if (password !== confirmPassword) throw new Error('As senhas não coincidem.');
         const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
-        if (!passwordPattern.test(password)) {
+        if (!passwordPattern.test(password))
           throw new Error('Senha deve ter letras e números, mínimo 6 caracteres.');
-        }
-        await createUserWithEmailAndPassword(auth, trimmedEmail, password);
+        await createUserWithEmailAndPassword(auth, email.trim(), password);
         dispatch({ type: 'SET_SUCCESS', message: 'Conta criada com sucesso!' });
         navigate('/dashboard', { replace: true });
-      } else if (view === 'forgot') {
-        await sendPasswordResetEmail(auth, trimmedEmail);
+      } else {
+        await sendPasswordResetEmail(auth, email.trim());
         dispatch({ type: 'SET_SUCCESS', message: 'Email de recuperação enviado!' });
       }
     } catch (err: any) {
@@ -156,28 +131,31 @@ const AuthPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex bg-gray-100">
-      {/* Imagem ilustrativa */}
-      <div className="hidden md:flex w-1/2 bg-yellow-500 items-center justify-center">
+      {/* Lado esquerdo vazio / neutro */}
+      <div className="w-1/3 bg-gray-100" />
+
+      {/* Centro: imagem Main.png */}
+      <div className="w-1/3 flex items-center justify-center bg-gray-100">
         <img
-          src="/logo-meus-investimentos.svg"
-          alt="Logo Meus Investimentos"
+          src="/Main.png"
+          alt="Imagem Principal"
           loading="lazy"
-          className="w-48 h-auto"
+          className="max-w-full max-h-screen object-contain"
+          style={{ maxHeight: '80vh' }}
         />
       </div>
-      <div className="w-full md:w-1/2 flex items-center justify-center p-4">
-        <div className="relative max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
+
+      {/* Lado direito: formulário */}
+      <div className="w-1/3 flex items-center justify-center p-6 bg-white">
+        <div className="relative max-w-md w-full rounded-lg shadow-lg">
           {loading && (
             <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-yellow-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
             </div>
           )}
+
           <h2 className="text-2xl font-semibold mb-6 text-center">
-            {view === 'login'
-              ? 'Entrar'
-              : view === 'signup'
-              ? 'Criar Conta'
-              : 'Recuperar Senha'}
+            {view === 'login' ? 'Entrar' : view === 'signup' ? 'Criar Conta' : 'Recuperar Senha'}
           </h2>
 
           {(error || success) && (
@@ -194,19 +172,17 @@ const AuthPage: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="email"
               ref={emailRef}
               aria-label="Email"
               placeholder="Email"
               autoComplete="username"
-              className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-yellow-300"
+              className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-blue-300"
               value={email}
               disabled={loading}
-              onChange={(e) =>
-                dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })
-              }
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })}
               required
             />
             {view !== 'forgot' && (
@@ -217,7 +193,7 @@ const AuthPage: React.FC = () => {
                     aria-label="Senha"
                     placeholder="Senha"
                     autoComplete={view === 'login' ? 'current-password' : 'new-password'}
-                    className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-yellow-300"
+                    className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-blue-300"
                     value={password}
                     disabled={loading}
                     onChange={(e) =>
@@ -230,11 +206,7 @@ const AuthPage: React.FC = () => {
                     type="button"
                     aria-label={passwordVisible ? 'Ocultar senha' : 'Mostrar senha'}
                     onClick={() =>
-                      dispatch({
-                        type: 'SET_FIELD',
-                        field: 'passwordVisible',
-                        value: !passwordVisible,
-                      })
+                      dispatch({ type: 'SET_FIELD', field: 'passwordVisible', value: !passwordVisible })
                     }
                     className="absolute inset-y-0 right-3 flex items-center text-gray-600"
                   >
@@ -247,15 +219,11 @@ const AuthPage: React.FC = () => {
                     aria-label="Confirmar senha"
                     placeholder="Confirmar senha"
                     autoComplete="new-password"
-                    className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-yellow-300"
+                    className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-blue-300"
                     value={confirmPassword}
                     disabled={loading}
                     onChange={(e) =>
-                      dispatch({
-                        type: 'SET_FIELD',
-                        field: 'confirmPassword',
-                        value: e.target.value,
-                      })
+                      dispatch({ type: 'SET_FIELD', field: 'confirmPassword', value: e.target.value })
                     }
                     minLength={6}
                     required
@@ -267,7 +235,7 @@ const AuthPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-yellow-500 text-white py-3 rounded-lg hover:bg-yellow-600 transition disabled:opacity-50"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
             >
               {view === 'login'
                 ? loading
@@ -308,7 +276,7 @@ const AuthPage: React.FC = () => {
                 className="text-blue-600 hover:underline"
                 onClick={() => dispatch({ type: 'SET_VIEW', view: 'login' })}
               >
-                Voltar
+                Voltar para login
               </button>
             )}
           </div>
@@ -318,4 +286,4 @@ const AuthPage: React.FC = () => {
   );
 };
 
-export default AuthPage;
+export { AuthPage };

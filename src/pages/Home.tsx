@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
     <div className="min-h-screen flex">
       {/* Coluna esquerda */}
@@ -42,4 +42,6 @@ export default function Home() {
       </div>
     </div>
   );
-}
+};
+
+export default Home;

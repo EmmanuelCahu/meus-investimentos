@@ -1,7 +1,7 @@
 // src/pages/AuthPage.tsx
 import React, { useEffect, useReducer, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '@/firebase/config';
+import { auth } from './firebase/config';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -85,14 +85,12 @@ const AuthPage: React.FC = () => {
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus email when view changes
   useEffect(() => {
     setTimeout(() => {
       emailRef.current?.focus();
     }, 100);
   }, [view]);
 
-  // Clear success message after 5s
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => dispatch({ type: 'RESET_MESSAGES' }), 5000);

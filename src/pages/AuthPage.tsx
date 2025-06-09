@@ -43,6 +43,7 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_VIEW':
+      // Reset form fields and messages on view change
       return {
         ...initialState,
         view: action.view,
@@ -80,20 +81,28 @@ function reducer(state: State, action: Action): State {
 
 const AuthPage: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { view, email, password, confirmPassword, loading, error, success, passwordVisible } =
-    state;
+  const {
+    view,
+    email,
+    password,
+    confirmPassword,
+    loading,
+    error,
+    success,
+    passwordVisible,
+  } = state;
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus email when view changes
+  // Auto-focus email input on view change
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       emailRef.current?.focus();
     }, 100);
+    return () => clearTimeout(timer);
   }, [view]);
 
-  // Clear success message after 5s
+  // Clear success message after 5 seconds
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => dispatch({ type: 'RESET_MESSAGES' }), 5000);
@@ -107,19 +116,34 @@ const AuthPage: React.FC = () => {
     dispatch({ type: 'SET_LOADING', loading: true });
 
     try {
+      const trimmedEmail = email.trim();
+
+      if (!trimmedEmail) {
+        throw new Error('Email é obrigatório.');
+      }
+
       if (view === 'login') {
-        await signInWithEmailAndPassword(auth, email.trim(), password);
+        if (!password) {
+          throw new Error('Senha é obrigatória.');
+        }
+        await signInWithEmailAndPassword(auth, trimmedEmail, password);
         navigate('/dashboard', { replace: true });
       } else if (view === 'signup') {
-        if (password !== confirmPassword) throw new Error('As senhas não coincidem.');
+        if (!password || !confirmPassword) {
+          throw new Error('Senha e confirmação são obrigatórias.');
+        }
+        if (password !== confirmPassword) {
+          throw new Error('As senhas não coincidem.');
+        }
         const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
-        if (!passwordPattern.test(password))
+        if (!passwordPattern.test(password)) {
           throw new Error('Senha deve ter letras e números, mínimo 6 caracteres.');
-        await createUserWithEmailAndPassword(auth, email.trim(), password);
+        }
+        await createUserWithEmailAndPassword(auth, trimmedEmail, password);
         dispatch({ type: 'SET_SUCCESS', message: 'Conta criada com sucesso!' });
         navigate('/dashboard', { replace: true });
-      } else {
-        await sendPasswordResetEmail(auth, email.trim());
+      } else if (view === 'forgot') {
+        await sendPasswordResetEmail(auth, trimmedEmail);
         dispatch({ type: 'SET_SUCCESS', message: 'Email de recuperação enviado!' });
       }
     } catch (err: any) {
@@ -170,7 +194,7 @@ const AuthPage: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <input
               type="email"
               ref={emailRef}
@@ -180,7 +204,9 @@ const AuthPage: React.FC = () => {
               className="w-full p-3 border rounded focus:outline-none focus:ring focus:ring-yellow-300"
               value={email}
               disabled={loading}
-              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })}
+              onChange={(e) =>
+                dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })
+              }
               required
             />
             {view !== 'forgot' && (
@@ -188,7 +214,6 @@ const AuthPage: React.FC = () => {
                 <div className="relative">
                   <input
                     type={passwordVisible ? 'text' : 'password'}
-                    ref={passwordRef}
                     aria-label="Senha"
                     placeholder="Senha"
                     autoComplete={view === 'login' ? 'current-password' : 'new-password'}
@@ -205,7 +230,11 @@ const AuthPage: React.FC = () => {
                     type="button"
                     aria-label={passwordVisible ? 'Ocultar senha' : 'Mostrar senha'}
                     onClick={() =>
-                      dispatch({ type: 'SET_FIELD', field: 'passwordVisible', value: !passwordVisible })
+                      dispatch({
+                        type: 'SET_FIELD',
+                        field: 'passwordVisible',
+                        value: !passwordVisible,
+                      })
                     }
                     className="absolute inset-y-0 right-3 flex items-center text-gray-600"
                   >
@@ -222,7 +251,11 @@ const AuthPage: React.FC = () => {
                     value={confirmPassword}
                     disabled={loading}
                     onChange={(e) =>
-                      dispatch({ type: 'SET_FIELD', field: 'confirmPassword', value: e.target.value })
+                      dispatch({
+                        type: 'SET_FIELD',
+                        field: 'confirmPassword',
+                        value: e.target.value,
+                      })
                     }
                     minLength={6}
                     required

@@ -1,44 +1,45 @@
-import React from "react";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  
+  <title>Meus Investimentos - Controle e Crescimento Financeiro</title>
+  
+  <meta name="description" content="Meus Investimentos - Plataforma para gestão de ativos, análise de mercado e educação financeira. Invista com segurança e inteligência." />
+  <meta name="author" content="Emmanuel Cahú" />
+  <meta name="keywords" content="investimentos, ações, FIIs, criptomoedas, educação financeira, carteira, análise técnica, renda passiva" />
+  
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" type="image/x-icon" />
+  
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="%PUBLIC_URL%/styles.css" />
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen bg-white">
-      {/* Coluna esquerda: espaço vazio para divisão */}
-      <div className="flex-1 flex justify-center items-center border-r border-gray-300"></div>
+  <!-- Meta tags para redes sociais (Open Graph) -->
+  <meta property="og:title" content="Meus Investimentos" />
+  <meta property="og:description" content="Plataforma para gestão de ativos, análise de mercado e educação financeira." />
+  <meta property="og:image" content="%PUBLIC_URL%/og-image.png" />
+  <meta property="og:url" content="https://meus-investimentos.com.br" />
+  <meta property="og:type" content="website" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Meus Investimentos" />
+  <meta name="twitter:description" content="Plataforma para gestão de ativos, análise de mercado e educação financeira." />
+  <meta name="twitter:image" content="%PUBLIC_URL%/og-image.png" />
+</head>
+<body style="margin:0; font-family: 'Inter', sans-serif; background-color:#fff; color:#333;">
+  <noscript>
+    <strong>Este aplicativo requer JavaScript para funcionar corretamente. Por favor, habilite o JavaScript no seu navegador.</strong>
+  </noscript>
 
-      {/* Coluna meio: imagem centralizada */}
-      <div className="flex-1 flex justify-center items-center border-r border-gray-300">
-        <img
-          src="/sua-imagem.png" // coloque o caminho correto da imagem
-          alt="Imagem central"
-          className="max-w-full max-h-[80vh] object-contain"
-        />
-      </div>
+  <div id="root"></div>
 
-      {/* Coluna direita: formulário */}
-      <div className="flex-1 flex justify-center items-center">
-        <form className="w-full max-w-sm p-0 m-0 bg-white">
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full mb-4 px-3 py-2 text-gray-700 focus:outline-none"
-            style={{ border: "none" }}
-          />
-          <input
-            type="password"
-            placeholder="Senha"
-            className="w-full mb-6 px-3 py-2 text-gray-700 focus:outline-none"
-            style={{ border: "none" }}
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white py-2 px-4 rounded"
-            style={{ transform: "scale(0.5)", transformOrigin: "center" }}
-          >
-            Entrar
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
+</body>
+</html>

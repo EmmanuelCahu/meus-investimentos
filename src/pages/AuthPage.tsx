@@ -126,7 +126,7 @@ const AuthPage: React.FC = () => {
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (loading) return; // previne múltiplos cliques
+      if (loading) return;
       dispatch({ type: 'RESET_MESSAGES' });
       dispatch({ type: 'SET_LOADING', loading: true });
 
@@ -260,11 +260,7 @@ const AuthPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() =>
-                      dispatch({
-                        type: 'SET_FIELD',
-                        field: 'passwordVisible',
-                        value: !passwordVisible,
-                      })
+                      dispatch({ type: 'SET_FIELD', field: 'passwordVisible', value: !passwordVisible })
                     }
                     className="absolute inset-y-0 right-3 flex items-center text-gray-600"
                     aria-label={passwordVisible ? 'Ocultar senha' : 'Mostrar senha'}
@@ -290,11 +286,7 @@ const AuthPage: React.FC = () => {
                   value={confirmPassword}
                   disabled={loading}
                   onChange={(e) =>
-                    dispatch({
-                      type: 'SET_FIELD',
-                      field: 'confirmPassword',
-                      value: e.target.value,
-                    })
+                    dispatch({ type: 'SET_FIELD', field: 'confirmPassword', value: e.target.value })
                   }
                   minLength={6}
                   required
@@ -305,8 +297,7 @@ const AuthPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              aria-busy={loading}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded focus:outline-none focus:ring focus:ring-blue-300 disabled:opacity-50"
             >
               {view === 'login'
                 ? 'Entrar'
@@ -316,32 +307,33 @@ const AuthPage: React.FC = () => {
             </button>
           </form>
 
-          <nav className="mt-4 flex justify-center space-x-4 text-sm text-blue-600 font-medium">
+          <nav
+            className="mt-6 flex justify-between text-sm text-blue-600 font-medium"
+            aria-label="Alternar entre modos de autenticação"
+          >
             {view !== 'login' && (
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'SET_VIEW', view: 'login' })}
-                className="underline hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 rounded"
+                className="hover:underline focus:outline-none"
               >
-                Voltar para Entrar
+                Entrar
               </button>
             )}
-
             {view !== 'signup' && (
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'SET_VIEW', view: 'signup' })}
-                className="underline hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 rounded"
+                className="hover:underline focus:outline-none"
               >
                 Criar Conta
               </button>
             )}
-
             {view !== 'forgot' && (
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'SET_VIEW', view: 'forgot' })}
-                className="underline hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 rounded"
+                className="hover:underline focus:outline-none"
               >
                 Esqueci a senha
               </button>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthPage } from './pages/AuthPage';
+import AuthPage from './pages/AuthPage'; // corrigido para default import
 import Dashboard from './pages/Dashboard';
 import Ativos from './pages/Ativos';
 import Recomendacoes from './pages/Recomendacoes';
@@ -34,12 +34,27 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<AuthPage />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/ativos" element={<ProtectedRoute><Ativos /></ProtectedRoute>} />
-          <Route path="/recomendacoes" element={<ProtectedRoute><Recomendacoes /></ProtectedRoute>} />
-          <Route path="/mercado" element={<ProtectedRoute><Mercado /></ProtectedRoute>} />
-          <Route path="/educacao" element={<ProtectedRoute><Educacao /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route
+            path="/dashboard"
+            element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+          />
+          <Route
+            path="/ativos"
+            element={<ProtectedRoute><Ativos /></ProtectedRoute>}
+          />
+          <Route
+            path="/recomendacoes"
+            element={<ProtectedRoute><Recomendacoes /></ProtectedRoute>}
+          />
+          <Route
+            path="/mercado"
+            element={<ProtectedRoute><Mercado /></ProtectedRoute>}
+          />
+          <Route
+            path="/educacao"
+            element={<ProtectedRoute><Educacao /></ProtectedRoute>}
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

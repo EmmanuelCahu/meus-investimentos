@@ -1,3 +1,7 @@
 node_modules
 dist
 .env
+.vscode
+.DS_Store
+.vercel
+firebase-debug.log

@@ -1,83 +1,109 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/firebase/config';
+import { toast } from 'react-toastify';
+
+const schema = z.object({
+  email: z.string().min(1, 'E-mail obrigatório').email('E-mail inválido'),
+  password: z.string().min(6, 'Senha deve ter ao menos 6 caracteres'),
+});
+
+type FormData = z.infer<typeof schema>;
 
 interface Props {
-  onSwitch: (type: 'signup' | 'forgot') => void;
+  onSwitch: (view: 'login' | 'signup' | 'forgot' | 'reset') => void;
 }
 
 export default function LoginForm({ onSwitch }: Props) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  function getErrorMessage(code: string) {
-    switch (code) {
-      case 'auth/user-not-found':
-        return 'Usuário não encontrado. Verifique o e-mail.';
-      case 'auth/wrong-password':
-        return 'Senha incorreta. Tente novamente.';
-      case 'auth/invalid-email':
-        return 'O e-mail digitado não é válido.';
-      case 'auth/too-many-requests':
-        return 'Muitas tentativas falhas. Tente novamente mais tarde.';
-      default:
-        return 'Erro ao tentar fazer login. Tente novamente.';
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
+  const onSubmit = async (data: FormData) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Como você está usando onAuthStateChanged no contexto, o redirecionamento deve acontecer automaticamente.
-      // Caso não aconteça, você pode forçar aqui a navegação (se estiver usando useNavigate).
-    } catch (err: any) {
-      setError(getErrorMessage(err.code));
-    } finally {
-      setLoading(false);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      toast.success('Login realizado com sucesso!');
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao fazer login');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-      {error && <p className="text-red-600 text-center">{error}</p>}
+    <>
+      <h2 className="text-2xl font-bold mb-6 text-center">Entrar</h2>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <label className="block mb-2 font-semibold" htmlFor="email">
+          E-mail
+        </label>
+        <input
+          id="email"
+          type="email"
+          {...register('email')}
+          className={`w-full p-3 border rounded-md mb-1 focus:outline-none ${
+            errors.email ? 'border-red-500' : 'border-gray-300'
+          }`}
+          aria-invalid={errors.email ? 'true' : 'false'}
+          aria-describedby="email-error"
+          placeholder="seu@email.com"
+        />
+        {errors.email && (
+          <p className="text-red-600 text-sm mb-2" id="email-error">
+            {errors.email.message}
+          </p>
+        )}
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        className="w-full p-3 border rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-        required
-      />
-      <input
-        type="password"
-        placeholder="Senha"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        className="w-full p-3 border rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-        required
-      />
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-      >
-        {loading ? 'Entrando...' : 'Log In'}
-      </button>
-      <div className="flex justify-between text-sm">
-        <button type="button" className="text-blue-600 hover:underline" onClick={() => onSwitch('forgot')}>
-          Forgot your Password?
+        <label className="block mb-2 font-semibold" htmlFor="password">
+          Senha
+        </label>
+        <input
+          id="password"
+          type="password"
+          {...register('password')}
+          className={`w-full p-3 border rounded-md mb-1 focus:outline-none ${
+            errors.password ? 'border-red-500' : 'border-gray-300'
+          }`}
+          aria-invalid={errors.password ? 'true' : 'false'}
+          aria-describedby="password-error"
+          placeholder="Sua senha"
+        />
+        {errors.password && (
+          <p className="text-red-600 text-sm mb-2" id="password-error">
+            {errors.password.message}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+        >
+          {isSubmitting ? 'Entrando...' : 'Entrar'}
         </button>
-        <button type="button" className="text-blue-600 hover:underline" onClick={() => onSwitch('signup')}>
-          Sign up
+      </form>
+      <div className="mt-4 text-center">
+        <button
+          onClick={() => onSwitch('forgot')}
+          className="text-blue-600 hover:underline text-sm"
+          type="button"
+        >
+          Esqueci minha senha
         </button>
       </div>
-    </form>
+      <div className="mt-4 text-center text-sm">
+        <span>Não tem conta? </span>
+        <button
+          onClick={() => onSwitch('signup')}
+          className="text-blue-600 font-semibold hover:underline"
+          type="button"
+        >
+          Cadastre-se
+        </button>
+      </div>
+    </>
   );
 }

@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase/config';
 import AuthPage from './pages/AuthPage';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard'; // Exemplo, crie esta página conforme necessidade
 
 const App: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState(auth.currentUser);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       setUser(firebaseUser);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -29,17 +27,26 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        {user ? (
-          <>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </>
-        ) : (
-          <>
-            <Route path="/" element={<AuthPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </>
-        )}
+        {/* Rota pública para autenticação */}
+        <Route
+          path="/auth"
+          element={!user ? <AuthPage /> : <Navigate to="/dashboard" replace />}
+        />
+
+        {/* Rota protegida para dashboard */}
+        <Route
+          path="/dashboard"
+          element={user ? <Dashboard /> : <Navigate to="/auth" replace />}
+        />
+
+        {/* Redirecionar root para dashboard ou auth conforme login */}
+        <Route
+          path="/"
+          element={<Navigate to={user ? "/dashboard" : "/auth"} replace />}
+        />
+
+        {/* Catch-all: redireciona para root */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

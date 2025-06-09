@@ -1,101 +1,127 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/firebase/config';
-import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+const schema = z
+  .object({
+    email: z.string().min(1, 'E-mail obrigatório').email('E-mail inválido'),
+    password: z.string().min(6, 'Senha deve ter ao menos 6 caracteres'),
+    confirmPassword: z.string().min(6, 'Confirmação obrigatória'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Senhas não conferem',
+    path: ['confirmPassword'],
+  });
+
+type FormData = z.infer<typeof schema>;
 
 interface Props {
-  onSwitch: () => void;
+  onSwitch: (view: 'login' | 'signup' | 'forgot' | 'reset') => void;
 }
 
 export default function SignUpForm({ onSwitch }: Props) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  function getErrorMessage(code: string) {
-    switch (code) {
-      case 'auth/email-already-in-use':
-        return 'Este email já está em uso.';
-      case 'auth/invalid-email':
-        return 'Email inválido.';
-      case 'auth/weak-password':
-        return 'Senha fraca. Use pelo menos 6 caracteres.';
-      default:
-        return 'Erro ao criar conta. Tente novamente.';
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem.');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres.');
-      return;
-    }
-
-    setLoading(true);
+  const onSubmit = async (data: FormData) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // Usuário criado e autenticado automaticamente
-      navigate('/dashboard');
-    } catch (err: any) {
-      setError(getErrorMessage(err.code));
-    } finally {
-      setLoading(false);
+      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      toast.success('Conta criada com sucesso!');
+      onSwitch('login');
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao criar conta');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-      {error && <p className="text-red-600 text-center">{error}</p>}
+    <>
+      <h2 className="text-2xl font-bold mb-6 text-center">Cadastrar</h2>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <label className="block mb-2 font-semibold" htmlFor="email">
+          E-mail
+        </label>
+        <input
+          id="email"
+          type="email"
+          {...register('email')}
+          className={`w-full p-3 border rounded-md mb-1 focus:outline-none ${
+            errors.email ? 'border-red-500' : 'border-gray-300'
+          }`}
+          aria-invalid={errors.email ? 'true' : 'false'}
+          aria-describedby="email-error"
+          placeholder="seu@email.com"
+        />
+        {errors.email && (
+          <p className="text-red-600 text-sm mb-2" id="email-error">
+            {errors.email.message}
+          </p>
+        )}
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        className="w-full p-3 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
-        required
-      />
-      <input
-        type="password"
-        placeholder="Senha"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        className="w-full p-3 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
-        required
-        minLength={6}
-      />
-      <input
-        type="password"
-        placeholder="Confirmar Senha"
-        value={confirmPassword}
-        onChange={e => setConfirmPassword(e.target.value)}
-        className="w-full p-3 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
-        required
-        minLength={6}
-      />
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition disabled:opacity-50"
-      >
-        {loading ? 'Criando...' : 'Criar Conta'}
-      </button>
-      <div className="text-sm text-center">
-        <button type="button" className="text-blue-600 hover:underline" onClick={onSwitch}>
-          Voltar para login
+        <label className="block mb-2 font-semibold" htmlFor="password">
+          Senha
+        </label>
+        <input
+          id="password"
+          type="password"
+          {...register('password')}
+          className={`w-full p-3 border rounded-md mb-1 focus:outline-none ${
+            errors.password ? 'border-red-500' : 'border-gray-300'
+          }`}
+          aria-invalid={errors.password ? 'true' : 'false'}
+          aria-describedby="password-error"
+          placeholder="Senha (mín 6 caracteres)"
+        />
+        {errors.password && (
+          <p className="text-red-600 text-sm mb-2" id="password-error">
+            {errors.password.message}
+          </p>
+        )}
+
+        <label className="block mb-2 font-semibold" htmlFor="confirmPassword">
+          Confirmar senha
+        </label>
+        <input
+          id="confirmPassword"
+          type="password"
+          {...register('confirmPassword')}
+          className={`w-full p-3 border rounded-md mb-1 focus:outline-none ${
+            errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+          }`}
+          aria-invalid={errors.confirmPassword ? 'true' : 'false'}
+          aria-describedby="confirmPassword-error"
+          placeholder="Confirme sua senha"
+        />
+        {errors.confirmPassword && (
+          <p className="text-red-600 text-sm mb-2" id="confirmPassword-error">
+            {errors.confirmPassword.message}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
+        >
+          {isSubmitting ? 'Cadastrando...' : 'Cadastrar'}
+        </button>
+      </form>
+      <div className="mt-4 text-center text-sm">
+        <span>Já tem conta? </span>
+        <button
+          onClick={() => onSwitch('login')}
+          className="text-green-600 font-semibold hover:underline"
+          type="button"
+        >
+          Entrar
         </button>
       </div>
-    </form>
+    </>
   );
 }
